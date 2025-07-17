@@ -154,6 +154,7 @@ MonoBehaviour:
   hitbox: {fileID: 6124097895104140100}
   maxHealth: 100
   gameReady: 0
+  bodyPos: {fileID: 132147978842518057}
   playerTarget: {fileID: 0}
 --- !u!195 &2840997652945502345
 NavMeshAgent:
@@ -261,6 +262,11 @@ PrefabInstance:
       addedObject: {fileID: 396132707771755478}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3ea946212e7416c4f8a3e7a404166265, type: 3}
+--- !u!4 &132147978842518057 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -2865483119877422194, guid: 3ea946212e7416c4f8a3e7a404166265, type: 3}
+  m_PrefabInstance: {fileID: 6480321054322831783}
+  m_PrefabAsset: {fileID: 0}
 --- !u!95 &613663844159786038 stripped
 Animator:
   m_CorrespondingSourceObject: {fileID: 5866666021909216657, guid: 3ea946212e7416c4f8a3e7a404166265, type: 3}

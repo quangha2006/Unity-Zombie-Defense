@@ -1,10 +1,10 @@
 using UnityEngine;
+using static ParticlePool;
 
 public class BulletBase : MonoBehaviour
 {
     [SerializeField] private float maxDistance = 100f;
     [SerializeField] private int damage = 10;
-    [SerializeField] private ParticleSystem trail;
     [SerializeField] public LayerMask hitMask;
 
     public float speed = 0f;
@@ -14,17 +14,14 @@ public class BulletBase : MonoBehaviour
 
     void Start()
     {
-        lastPosition = transform.position;
+        ResetBullet();
     }
 
     void Update()
     {
         if (speed <= 0.01f)
             return;
-        if (trail != null && !trail.isPlaying)
-        {
-            trail.Play();
-        }
+
         float distanceThisFrame = speed * Time.deltaTime;
         Vector3 currentPosition = transform.position + transform.forward * distanceThisFrame;
         RaycastHit hit;
@@ -38,18 +35,18 @@ public class BulletBase : MonoBehaviour
                 if (damageable != null)
                 {
                     damageable.TakeDamage(damage);
-                    // Spawn effect
-                    //Instantiate(hitEffectPrefab, hit.point, Quaternion.identity);
                 }
+                ReturnToPool();
+                return;
             }
             else if (hit.collider.CompareTag("Obstacle"))
             {
-                // Spawn effect
-                //Instantiate(hitEffectPrefab, hit.point, Quaternion.identity);
+                Vector3 bulletDir = (hit.point - lastPosition).normalized;
+                Quaternion particleRotation = Quaternion.LookRotation(-bulletDir);
+                ParticlePool.Instance.PlayFX(ParticleType.HitWall, hit.point, particleRotation);
+                ReturnToPool();
+                return;
             }
-
-            Destroy(gameObject);
-            return;
         }
 
         transform.position = currentPosition;
@@ -58,7 +55,17 @@ public class BulletBase : MonoBehaviour
         traveledDistance += distanceThisFrame;
         if (traveledDistance >= maxDistance)
         {
-            Destroy(gameObject);
+            ReturnToPool();
         }
+    }
+    public void ResetBullet()
+    {
+        traveledDistance = 0f;
+        lastPosition = transform.position;
+    }
+
+    private void ReturnToPool()
+    {
+        BulletPool.Instance.ReturnBullet(this);
     }
 }

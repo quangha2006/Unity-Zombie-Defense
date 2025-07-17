@@ -1,20 +1,32 @@
 using UnityEditor.ShaderGraph;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class UIManager : MonoBehaviourSingleton<UIManager>
 {
     [SerializeField] private InputManager inputManager;
+    [SerializeField] private GameObject loadingScreen;
+    [SerializeField] private Slider loadingBar;
+    [SerializeField] private GameObject joySticks;
+
     protected override void Awake()
     {
         base.Awake();
         DontDestroyOnLoad(Instance);
+        SetActiveLoadingScreen(true);
+        SetActiveOnScreenJoyStick(false);
     }
-    private void Update()
+
+    public void SetActiveLoadingScreen(bool isShow)
     {
-        Vector2 moveInput = inputManager.GetMoveInput();
-        //if (moveInput != Vector2.zero)
-        //{
-        //    Debug.Log("Input: " + moveInput);
-        //}
+        loadingScreen.SetActive(isShow);
+    }
+    public void UpdateLoadingBar(float percent)
+    {
+        loadingBar.value = percent;
+    }
+    public void SetActiveOnScreenJoyStick(bool isShow)
+    {
+        joySticks.SetActive(isShow);
     }
 }

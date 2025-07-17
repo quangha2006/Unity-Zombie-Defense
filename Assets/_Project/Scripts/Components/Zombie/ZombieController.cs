@@ -1,5 +1,7 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.AI;
+using static ParticlePool;
 
 public class ZombieController : MonoBehaviour, IDamageable
 {
@@ -11,14 +13,15 @@ public class ZombieController : MonoBehaviour, IDamageable
     [SerializeField] private float angularSpeed;
     [SerializeField] private float stoppingDistance;
     [SerializeField] private float updatePlayerPosRate = 0.2f;
-    [SerializeField] private float damageAmount = 10f;
+    [SerializeField] private int damageAmount = 10;
     [SerializeField] private float enableHitBoxTime = 0.3f;
     [SerializeField] private float disableHitBoxTime = 0.8f;
     [SerializeField] private ZombieArmHitbox hitbox;
-    [SerializeField] private float maxHealth = 100f;
+    [SerializeField] private int maxHealth = 100;
     [SerializeField] public bool gameReady = false;
+    [SerializeField] private Transform bodyPos;
 
-    public Transform playerTarget;
+    public PlayerController playerTarget;
     public NavMeshAgent NavMeshAgent => agent;
     private float updatePlayerPosTimer;
     private float smoothSpeed = 0f;
@@ -27,9 +30,21 @@ public class ZombieController : MonoBehaviour, IDamageable
     private bool isAttacking = false;
     private bool hasDealtDamage = false;
     private AttackStateBehaviour[] attackStateBehaviour;
-    private float currentHealth;
+    private int currentHealth;
     private bool isDead = false;
     private Collider collider;
+    public event Action<int, int> onHealthChanged;
+    public event Action onDie;
+    public int health => currentHealth;
+    public int MaxHealth => maxHealth;
+    private bool isGoAround = false;
+    private float goAroundWaiting;
+    private const float maxGoAroundWaiting = 6f;
+
+    void Awake()
+    {
+        currentHealth = maxHealth;
+    }
     void Start()
     {
         agent.speed = moveSpeed;
@@ -44,7 +59,7 @@ public class ZombieController : MonoBehaviour, IDamageable
             behaviour.onStateUpdate += OnAnimAttackUpdate;
         }
         hitbox.onTriggerEnter += OnArmHitboxTriggerEnter;
-        currentHealth = maxHealth;
+
         collider = GetComponent<Collider>();
         SwitchToAgent();
     }
@@ -55,17 +70,50 @@ public class ZombieController : MonoBehaviour, IDamageable
         {
             return;
         }
+
         if (updatePlayerPosTimer > 0f)
             updatePlayerPosTimer -= Time.deltaTime;
 
-        float distance = Vector3.Distance(transform.position, playerTarget.position);
+        Vector3 playerPos = playerTarget.transform.position;
+        float distance = Vector3.Distance(transform.position, playerPos);
 
-        if (updatePlayerPosTimer < 0f && distance > stoppingDistance)
+        if (playerTarget.isDeath)
+        {
+            if (!isAttacking)
+            {
+                anim.SetBool("Attacking", false);
+
+                SwitchToAgent();
+                
+                if (agent.remainingDistance <= agent.stoppingDistance && goAroundWaiting <= 0f)
+                {
+                    goAroundWaiting = UnityEngine.Random.Range(1, maxGoAroundWaiting);
+                }
+
+                goAroundWaiting -= Time.deltaTime;
+
+                if (goAroundWaiting  <= 0f && (!isGoAround || agent.remainingDistance <= agent.stoppingDistance))
+                {
+                    Vector3 randomDirection = UnityEngine.Random.insideUnitSphere * 15f;
+                    randomDirection += transform.position;
+
+                    NavMeshHit hit;
+                    if (NavMesh.SamplePosition(randomDirection, out hit, 15f, NavMesh.AllAreas))
+                    {
+                        agent.SetDestination(hit.position);
+                        agent.speed = moveSpeed * 0.6f;
+                        anim.SetFloat("RunAnimSpeed", 0.6f);
+                        isGoAround = true;
+                    }
+                }
+            }
+        }
+        else if (updatePlayerPosTimer < 0f && distance > stoppingDistance)
         {
             if (!isAttacking)
             {
                 SwitchToAgent();
-                agent.SetDestination(playerTarget.position);
+                agent.SetDestination(playerPos);
             }
             anim.SetBool("Attacking", false);
             updatePlayerPosTimer = updatePlayerPosRate;
@@ -79,6 +127,7 @@ public class ZombieController : MonoBehaviour, IDamageable
                 isAttacking = true;
             }
         }
+
         float currentMoveSpeed = agent.velocity.magnitude;
 
         smoothSpeed = Mathf.MoveTowards(smoothSpeed, currentMoveSpeed > 0.1f ? 1f : 0, lerpSpeed * Time.deltaTime);
@@ -92,7 +141,7 @@ public class ZombieController : MonoBehaviour, IDamageable
     }
     private bool RotateTowardsTarget()
     {
-        Vector3 direction = (playerTarget.position - transform.position).normalized;
+        Vector3 direction = (playerTarget.transform.position - transform.position).normalized;
 
         direction.y = 0f;
 
@@ -107,7 +156,16 @@ public class ZombieController : MonoBehaviour, IDamageable
     }
     public void ResetZombie()
     {
-        // TODO
+        currentHealth = maxHealth;
+        isGoAround = false;
+        isAttacking = false;
+        anim.SetBool("Attacking", false);
+        anim.SetFloat("RunAnimSpeed", 1f);
+        SwitchToAgent();
+        agent.speed = moveSpeed;
+        agent.acceleration = accelerationSpeed;
+        agent.angularSpeed = angularSpeed;
+        agent.stoppingDistance = stoppingDistance;
     }
 
     public void DealDamage()
@@ -166,14 +224,15 @@ public class ZombieController : MonoBehaviour, IDamageable
         hitbox.onTriggerEnter -= OnArmHitboxTriggerEnter;
     }
 
-    public void TakeDamage(float amount)
+    public void TakeDamage(int amount)
     {
         if (isDead)
             return;
 
         currentHealth -= amount;
-
-        if (currentHealth <= 0f)
+        onHealthChanged?.Invoke(currentHealth, maxHealth);
+        ParticlePool.Instance.PlayFX(ParticleType.HitZombie, bodyPos.position, Quaternion.identity);
+        if (currentHealth <= 0)
         {
             Die();
         }
@@ -202,7 +261,7 @@ public class ZombieController : MonoBehaviour, IDamageable
 
         if (collider != null)
             collider.enabled = false;
-
+        onDie?.Invoke();
         //Play particle and destroy or return to pool
         //Destroy(gameObject, 5f);
     }
@@ -212,7 +271,10 @@ public class ZombieController : MonoBehaviour, IDamageable
         {
             agentObstacle.enabled = false;
             agent.enabled = true;
+            agent.ResetPath();
+            agent.Warp(transform.position);
         }
+
         agent.isStopped = false;
     }
 

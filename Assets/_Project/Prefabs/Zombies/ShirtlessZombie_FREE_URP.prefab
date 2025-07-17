@@ -596,6 +596,7 @@ MonoBehaviour:
   hitbox: {fileID: 6173882371976213368}
   maxHealth: 100
   gameReady: 0
+  bodyPos: {fileID: 7519321484099765122}
   playerTarget: {fileID: 0}
 --- !u!195 &4873017059084473629
 NavMeshAgent:

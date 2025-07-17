@@ -4879,12 +4879,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 43bf74a129092634ab998491f0d71f45, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxDistance: 100
-  damage: 20
-  trail: {fileID: 0}
+  maxDistance: 80
+  damage: 15
   hitMask:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 320
   speed: 0
 --- !u!1 &3275614383432432419
 GameObject:

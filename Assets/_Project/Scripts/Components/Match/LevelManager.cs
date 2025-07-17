@@ -1,6 +1,6 @@
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using Unity.VisualScripting;
+using Unity.Cinemachine;
 using UnityEngine;
 
 public class LevelManager : MonoBehaviour
@@ -10,7 +10,10 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private Transform[] zombieSpawnPoints;
     [SerializeField] private float zombieSpawnRate;
     [SerializeField] private List<ZombieController> zombieSpawned;
-    [SerializeField] private PlayerController player;
+    [SerializeField] private PlayerController playerPrefab;
+    [SerializeField] private Transform playerSpawnPoint;
+    [SerializeField] private GameHud gameHud;
+    [SerializeField] private CinemachineCamera virtualCamera;
 
     private List<ZombieController> zombiePolling = new List<ZombieController>();
     
@@ -18,26 +21,44 @@ public class LevelManager : MonoBehaviour
     private int navMeshAgentPriority = 50;
     private float spawnTimer = 0f;
     private float matchPrepareTime = 3f;
-    void Start()
-    {
-        foreach (var zombie in zombieSpawned)
-        {
-            zombie.playerTarget = player.transform;
-            zombie.NavMeshAgent.avoidancePriority = navMeshAgentPriority++;
-        }
-        matchState = MatchState.Preparing;
-    }
+    private float loadingTimer = 0.5f;
+    private PlayerController mainPlayer;
 
+    public event Action<PlayerController> OnPlayerSpawned;
+    public event Action<ZombieController> OnZombieSpawned;
+    public event Action<MatchState> OnMatchStateChanged;
+    private void Start()
+    {
+        matchState++;
+    }
     void Update()
     {
         switch (matchState)
         {
             case MatchState.None:
+            case MatchState.SpawnPlayer:
+                SpawnPlayer();
                 break;
-            case MatchState.Preparing:
+            case MatchState.InitZombie:
+                InitZombies();
+                break;
+            case MatchState.LevelInitComplete:
+                UIManager.Instance.UpdateLoadingBar(1f);
+                loadingTimer -= Time.deltaTime;
+                if (loadingTimer <= 0f)
+                {
+                    UIManager.Instance.SetActiveLoadingScreen(false);
+                    UIManager.Instance.SetActiveOnScreenJoyStick(true);
+                    matchState++;
+                }
+                break;
+            case MatchState.PlayCutScene:
                 matchPrepareTime -= Time.deltaTime;
                 if (matchPrepareTime <= 0f)
-                    matchState = MatchState.Playing;
+                {
+                    matchState++;
+                    ActiveZombieAndPlayer();
+                }
                 break;
             case MatchState.Playing:
                 SpawnNewZombie();
@@ -62,7 +83,7 @@ public class LevelManager : MonoBehaviour
                 return;
             }
 
-            int prefabIndex = Random.Range(0, zombiePrefabs.Length);
+            int prefabIndex = UnityEngine.Random.Range(0, zombiePrefabs.Length);
             var prefab = zombiePrefabs[prefabIndex];
 
             // Random spawn point
@@ -72,28 +93,66 @@ public class LevelManager : MonoBehaviour
                 return;
             }
 
-            int pointIndex = Random.Range(0, zombieSpawnPoints.Length);
+            int pointIndex = UnityEngine.Random.Range(0, zombieSpawnPoints.Length);
             Transform spawnPoint = zombieSpawnPoints[pointIndex];
 
             // Instantiate
             var newZombie = Instantiate(prefab, spawnPoint.position, spawnPoint.rotation);
 
-            newZombie.playerTarget = player.transform;
+            newZombie.playerTarget = mainPlayer;
             newZombie.NavMeshAgent.avoidancePriority = navMeshAgentPriority++;
             newZombie.gameReady = true;
             zombieSpawned.Add(newZombie);
-
-            Debug.Log($"Spawned {prefab.name} at {spawnPoint.name}");
+            OnZombieSpawned?.Invoke(newZombie);
         }
     }
-
-
-    private enum MatchState
+    private void SpawnPlayer()
     {
-        None,
-        Preparing,
-        Playing,
-        TimeUp,
+        mainPlayer = Instantiate(playerPrefab, playerSpawnPoint.position, playerSpawnPoint.rotation);
+        if (mainPlayer != null)
+        {
+            OnPlayerSpawned?.Invoke(mainPlayer);
+            virtualCamera.Follow = mainPlayer.transform;
+            virtualCamera.LookAt = mainPlayer.transform;
+            mainPlayer.onDeath += OnPlayerDeath;
+            matchState++;
+        }
+        else
+        {
+            //TODO: Show popup error
+        }
+    }
+    private void InitZombies()
+    {
+        foreach (var zombie in zombieSpawned)
+        {
+            zombie.playerTarget = mainPlayer;
+            zombie.NavMeshAgent.avoidancePriority = navMeshAgentPriority++;
+            OnZombieSpawned?.Invoke(zombie);
+        }
+        matchState++;
+    }
+    private void ActiveZombieAndPlayer()
+    {
+        mainPlayer.gameReady = true;
+        foreach (var zombie in zombieSpawned)
+        {
+            zombie.gameReady = true;
+        }
+    }
+    private void OnPlayerDeath()
+    {
+        matchState = MatchState.End;
+    }
+    public enum MatchState
+    {
+        None = 0,
+        SpawnPlayer = 1,
+        InitZombie = 2,
+        LevelInitComplete = 3,
+        PlayCutScene = 4,
+        Playing = 5,
+        TimeUp = 6,
         End
     }
 }
