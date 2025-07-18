@@ -6,11 +6,12 @@ public class AttackStateBehaviour : StateMachineBehaviour
 {
     public event Action<Animator, AnimatorStateInfo, int> onStateExit;
     public event Action<Animator, AnimatorStateInfo, int> onStateUpdate;
+    public event Action<Animator, AnimatorStateInfo, int> onStateEnter;
     // OnStateEnter is called when a transition starts and the state machine starts to evaluate this state
-    //override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
-    //{
-    //    
-    //}
+    override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
+    {
+        onStateEnter?.Invoke(animator, stateInfo, layerIndex);
+    }
 
     // OnStateUpdate is called on each Update frame between OnStateEnter and OnStateExit callbacks
     override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)

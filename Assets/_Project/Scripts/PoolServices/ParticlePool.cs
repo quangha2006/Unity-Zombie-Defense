@@ -4,27 +4,30 @@ using UnityEngine;
 
 public class ParticlePool : MonoBehaviourSingleton<ParticlePool>
 {
-    [SerializeField] private GameObject hitWallFXPrefab;
-    [SerializeField] private GameObject hitZombieFXPrefab;
+    [SerializeField] private ParticleSystem hitWallFXPrefab;
+    [SerializeField] private ParticleSystem hitZombieFXPrefab;
+    [SerializeField] private ParticleSystem bulletExplosionPrefab;
+
     [SerializeField] private int poolSizePerType = 10;
 
-    private Dictionary<ParticleType, Queue<GameObject>> poolDict = new Dictionary<ParticleType, Queue<GameObject>>();
-    private Dictionary<ParticleType, GameObject> prefabDict = new Dictionary<ParticleType, GameObject>();
+    private Dictionary<ParticleType, Queue<ParticleSystem>> poolDict = new Dictionary<ParticleType, Queue<ParticleSystem>>();
+    private Dictionary<ParticleType, ParticleSystem> prefabDict = new Dictionary<ParticleType, ParticleSystem>();
 
 
     private void Start()
     {
         prefabDict[ParticleType.HitWall] = hitWallFXPrefab;
         prefabDict[ParticleType.HitZombie] = hitZombieFXPrefab;
+        prefabDict[ParticleType.BulletShotgunExplosive] = bulletExplosionPrefab;
 
         foreach (var type in prefabDict.Keys)
         {
-            Queue<GameObject> queue = new Queue<GameObject>();
+            Queue<ParticleSystem> queue = new Queue<ParticleSystem>();
 
             for (int i = 0; i < poolSizePerType; i++)
             {
-                GameObject fx = Instantiate(prefabDict[type], transform);
-                fx.SetActive(false);
+                ParticleSystem fx = Instantiate(prefabDict[type], transform);
+                fx.gameObject.SetActive(false);
                 queue.Enqueue(fx);
             }
 
@@ -37,32 +40,31 @@ public class ParticlePool : MonoBehaviourSingleton<ParticlePool>
         if (!poolDict.ContainsKey(type)) 
             return;
 
-        GameObject fx = poolDict[type].Count > 0 ? poolDict[type].Dequeue() : Instantiate(prefabDict[type]);
+        ParticleSystem fx = poolDict[type].Count > 0 ? poolDict[type].Dequeue() : Instantiate(prefabDict[type]);
 
         fx.transform.position = position;
         fx.transform.rotation = rotation;
-        fx.SetActive(true);
-
-        StartCoroutine(DeactivateAfterTime(fx, GetDuration(fx)));
-
-        poolDict[type].Enqueue(fx);
+        fx.gameObject.SetActive(true);
+        fx.Play(true);
+        var durationfx = GetDuration(fx);
+        StartCoroutine(DeactivateAfterTime(type, fx, durationfx));
     }
 
-    private float GetDuration(GameObject fx)
+    private float GetDuration(ParticleSystem fx)
     {
-        ParticleSystem ps = fx.GetComponent<ParticleSystem>();
-        if (ps != null)
+        if (fx != null)
         {
-            return ps.main.duration + ps.main.startLifetime.constantMax;
+            return fx.main.duration + fx.main.startLifetime.constantMax;
         }
 
         return 1f;
     }
 
-    private IEnumerator DeactivateAfterTime(GameObject fx, float time)
+    private IEnumerator DeactivateAfterTime(ParticleType type, ParticleSystem fx, float time)
     {
         yield return new WaitForSeconds(time);
-        fx.SetActive(false);
+        fx.gameObject.SetActive(false);
+        poolDict[type].Enqueue(fx);
     }
-    public enum ParticleType { HitWall, HitZombie }
+    public enum ParticleType { HitWall, HitZombie, BulletShotgunExplosive }
 }

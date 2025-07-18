@@ -53,11 +53,11 @@ public class SoundManager : MonoBehaviourSingleton<SoundManager>
         bgmSource.Stop();
     }
 
-    public void PlaySFX(string name)
+    public void PlaySFX(string name, float volumeScale = 1f)
     {
         if (sfxMap.TryGetValue(name, out var clip))
         {
-            sfxSource.PlayOneShot(clip);
+            sfxSource.PlayOneShot(clip, volumeScale);
         }
         else
         {
@@ -71,12 +71,13 @@ public class SoundManager : MonoBehaviourSingleton<SoundManager>
             AudioSource.PlayClipAtPoint(clip, position);
         }
     }
-    public void PlayLoopingSFX(string name)
+    public void PlayLoopingSFX(string name, float volumeScale = 1f)
     {
         if (sfxMap.TryGetValue(name, out var clip))
         {
             loopingSFXSource.clip = clip;
             loopingSFXSource.loop = true;
+            loopingSFXSource.volume = volumeScale;
             if (!loopingSFXSource.isPlaying)
             {
                 loopingSFXSource.Play();

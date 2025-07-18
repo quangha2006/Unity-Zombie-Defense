@@ -19,9 +19,9 @@ namespace Weapon
         {
             if (!isPlayLoopingSFX)
             {
-                UnityEngine.Debug.Log("PlayVfx: " + shootVfx);
+                //UnityEngine.Debug.Log("PlayVfx: " + shootVfx);
                 isPlayLoopingSFX = true;
-                SoundManager.Instance.PlayLoopingSFX(shootVfx);
+                SoundManager.Instance.PlayLoopingSFX(shootVfx, 0.3f);
             }
         }
         private void OnDisable()

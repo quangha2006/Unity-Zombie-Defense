@@ -1,13 +1,14 @@
+using System.Collections.Generic;
+using System.ComponentModel;
 using UnityEngine;
 
 namespace Weapon
 {
     public class WeaponBase : MonoBehaviour
     {
-        [SerializeField] private int numBullet;
         [SerializeField] private float bulletSpeed = 10f;
         [SerializeField] private float shootSpeed = 0.5f;
-        [SerializeField] private Transform gunBarrelPos;
+        [SerializeField] private Transform[] gunBarrelPos;
         [SerializeField] private float bulletHorizontalDeviation;
         [SerializeField] private ParticleSystem[] particles;
         [SerializeField] protected string shootVfx;
@@ -34,24 +35,33 @@ namespace Weapon
                 isFiring = false;
             }
         }
-        public virtual BulletBase Fire(Vector3 direction, float fixedy)
+        public virtual BulletBase[] Fire(Vector3 direction, float fixedy)
         {
             if (shootTimer <= 0f)
             {
+                var bulletList = new BulletBase[gunBarrelPos.Length];
                 shootTimer = shootSpeed;
-                var randomYaw = Random.Range(-bulletHorizontalDeviation, bulletHorizontalDeviation);
-                var deviatedDirection = direction + new Vector3(0f, randomYaw, 0f);
-                var bulletPos = gunBarrelPos.position;
-                var bullet = BulletPool.Instance.GetBullet();
-                bullet.transform.position = bulletPos;
-                bullet.transform.rotation = Quaternion.Euler(deviatedDirection);
-                bullet.speed = bulletSpeed;
-                bullet.ResetBullet();
-                bullet.gameObject.SetActive(true);
+                isFiring = true;
+                for (int i = 0; i < gunBarrelPos.Length; i++)
+                {
+                    var randomYaw = Random.Range(-bulletHorizontalDeviation, bulletHorizontalDeviation);
+                    var deviatedDirection = direction + new Vector3(0f, randomYaw, 0f);
+                    var bulletPos = gunBarrelPos[i].position;
+                    var bullet = BulletPool.Instance.GetBullet(weaponType);
+                    if (bullet == null)
+                        return null;
+                    bullet.transform.position = bulletPos;
+                    bullet.transform.rotation = Quaternion.Euler(deviatedDirection);
+                    bullet.speed = bulletSpeed;
+                    bullet.ResetBullet();
+                    bullet.gameObject.SetActive(true);
+                    bulletList[i] = bullet;
+                }
+
                 PlayParticles();
                 PlayVfx();
-                isFiring = true;
-                return bullet;
+
+                return bulletList;
             }
             return null;
         }
@@ -64,7 +74,7 @@ namespace Weapon
         }
         protected virtual void PlayVfx()
         {
-            SoundManager.Instance.PlaySFX(shootVfx);
+            SoundManager.Instance.PlaySFX(shootVfx, 0.3f);
         }
     }
 }

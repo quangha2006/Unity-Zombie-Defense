@@ -156,6 +156,8 @@ MonoBehaviour:
   gameReady: 0
   bodyPos: {fileID: 132147978842518057}
   deathVfx: zombie_death_010
+  cheat: 0
+  hitSfx: zombie_hiss_010
   playerTarget: {fileID: 0}
 --- !u!195 &2840997652945502345
 NavMeshAgent:

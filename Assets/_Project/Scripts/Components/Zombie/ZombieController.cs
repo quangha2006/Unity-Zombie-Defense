@@ -21,8 +21,9 @@ public class ZombieController : MonoBehaviour, IDamageable
     [SerializeField] public bool gameReady = false;
     [SerializeField] private Transform bodyPos;
     [SerializeField] private string deathVfx;
-
-    public PlayerController playerTarget;
+    [SerializeField] private bool cheat = false;
+    [SerializeField] private string hitSfx;
+    [HideInInspector] public PlayerController playerTarget;
     public NavMeshAgent NavMeshAgent => agent;
     private float updatePlayerPosTimer;
     private float smoothSpeed = 0f;
@@ -58,6 +59,7 @@ public class ZombieController : MonoBehaviour, IDamageable
         {
             behaviour.onStateExit += OnAnimAttackExit;
             behaviour.onStateUpdate += OnAnimAttackUpdate;
+            behaviour.onStateEnter += OnAnimAttackEnter;
         }
         hitbox.onTriggerEnter += OnArmHitboxTriggerEnter;
 
@@ -214,13 +216,20 @@ public class ZombieController : MonoBehaviour, IDamageable
             hasDealtDamage = false;
         }
     }
-
+    public void OnAnimAttackEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
+    {
+        if (!string.IsNullOrEmpty(hitSfx))
+        {
+            SoundManager.Instance.PlaySFX(hitSfx);
+        }
+    }
     void OnDisable()
     {
         foreach (var behaviour in attackStateBehaviour)
         {
             behaviour.onStateExit -= OnAnimAttackExit;
             behaviour.onStateUpdate -= OnAnimAttackUpdate;
+            behaviour.onStateEnter -= OnAnimAttackEnter;
         }
         hitbox.onTriggerEnter -= OnArmHitboxTriggerEnter;
     }
@@ -229,8 +238,10 @@ public class ZombieController : MonoBehaviour, IDamageable
     {
         if (isDead)
             return;
-
-        currentHealth -= amount;
+#if UNITY_EDITOR
+        if (!cheat)
+#endif
+            currentHealth -= amount;
         onHealthChanged?.Invoke(currentHealth, maxHealth);
         ParticlePool.Instance.PlayFX(ParticleType.HitZombie, bodyPos.position, Quaternion.identity);
         if (currentHealth <= 0)

@@ -1010,6 +1010,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Character
       objectReference: {fileID: 0}
+    - target: {fileID: 5333515862454728232, guid: ed03260b2bfac2d48b776c6d924ac46d, type: 3}
+      propertyPath: gameReady
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6608543438733834529, guid: ed03260b2bfac2d48b776c6d924ac46d, type: 3}
       propertyPath: isInLobby
       value: 1

@@ -81,9 +81,5 @@ public class CharacterMovement : MonoBehaviour
             animator.SetFloat("MoveForward", localMoveDirection.z);
             animator.SetFloat("MoveRight", localMoveDirection.x);
         }
-        else
-        {
-
-        }
     }
 }

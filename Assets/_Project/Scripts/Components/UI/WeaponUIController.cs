@@ -6,22 +6,27 @@ public class WeaponUIController : MonoBehaviour
     [SerializeField] private LevelManager levelManager;
     [SerializeField] private Button buttonLeft;
     [SerializeField] private Button buttonRight;
+    [SerializeField] private Button buttonGrenade;
     
     private PlayerController currentPlayer;
 
     [SerializeField] private string weaponLeftName;
     [SerializeField] private string weaponRightName;
+    [SerializeField] private string weaponGrenadeName;
     private bool isWeaponNameSetted = false;
     private void Awake()
     {
         buttonLeft.gameObject.SetActive(false);
         buttonRight.gameObject.SetActive(false);
+        buttonGrenade.gameObject.SetActive(false);
     }
     void Start()
     {
         levelManager.OnPlayerSpawned += OnPlayerSpawned;
+        levelManager.OnMatchStateChanged += OnMatchStateChanged;
         buttonLeft.onClick.AddListener(OnButtonLeftPressed);
         buttonRight.onClick.AddListener(OnButtonRightPressed);
+        buttonGrenade.onClick.AddListener(OnButtonGrenadePressed);
     }
     
     private void Update()
@@ -31,18 +36,21 @@ public class WeaponUIController : MonoBehaviour
             var weaponList = currentPlayer.GetWeaponListName();
             if (weaponList == null)
                 return;
-            Debug.Log("weaponList: " + weaponList.Count);
+
             if (weaponList.Count > 0)
             {
-                Debug.Log("weaponList[0] " + weaponList[0]);
                 weaponLeftName = weaponList[0];
                 buttonLeft.gameObject.SetActive(true);
             }
             if (weaponList.Count > 1)
             {
-                Debug.Log("weaponList[1] " + weaponList[1]);
                 weaponRightName = weaponList[1];
                 buttonRight.gameObject.SetActive(true);
+            }
+            if (weaponList.Count > 2)
+            {
+                weaponGrenadeName = weaponList[2];
+                buttonGrenade.gameObject.SetActive(true);
             }
             var currentWeaponName = currentPlayer.currentWeaponName;
             if (!string.IsNullOrEmpty(currentWeaponName))
@@ -55,13 +63,15 @@ public class WeaponUIController : MonoBehaviour
 
     private void OnButtonLeftPressed() 
     {
-        Debug.Log("OnButtonLeftPressed " + weaponLeftName);
         currentPlayer.LoadWeapon(weaponLeftName);
     }
     private void OnButtonRightPressed()
     {
-        Debug.Log("OnButtonRightPressed " + weaponRightName);
         currentPlayer.LoadWeapon(weaponRightName);
+    }
+    private void OnButtonGrenadePressed()
+    {
+        currentPlayer.LoadWeapon(weaponGrenadeName);
     }
     private void OnPlayerSpawned(PlayerController player)
     {
@@ -79,6 +89,19 @@ public class WeaponUIController : MonoBehaviour
         if (!string.IsNullOrEmpty(weaponRightName))
         {
             buttonRight.interactable = (weaponName != weaponRightName);
+        }
+        if (!string.IsNullOrEmpty(weaponGrenadeName))
+        {
+            buttonGrenade.interactable = (weaponName != weaponGrenadeName);
+        }
+    }
+    private void OnMatchStateChanged(LevelManager.MatchState matchState)
+    {
+        if (matchState > LevelManager.MatchState.Playing)
+        {
+            buttonLeft.gameObject.SetActive(false);
+            buttonRight.gameObject.SetActive(false);
+            buttonGrenade.gameObject.SetActive(false);
         }
     }
 }

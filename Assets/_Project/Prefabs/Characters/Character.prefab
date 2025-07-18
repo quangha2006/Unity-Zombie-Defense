@@ -56,7 +56,8 @@ MonoBehaviour:
   maxHealth: 100
   fixedBulletY: {fileID: 3660788045981211792}
   takeDamageParticle: {fileID: 1838334482011484679}
-  gameReady: 1
+  cheat: 0
+  gameReady: 0
   levelManager: {fileID: 0}
 --- !u!114 &6608543438733834529
 MonoBehaviour:
@@ -74,6 +75,7 @@ MonoBehaviour:
   moveSpeed: 3
   rotationSpeed: 10
   playerController: {fileID: 5333515862454728232}
+  isInLobby: 0
 --- !u!143 &2105851639315066449
 CharacterController:
   m_ObjectHideFlags: 0

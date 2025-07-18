@@ -13,7 +13,7 @@ public class PlayerController : MonoBehaviour, IDamageable
     [SerializeField] private int maxHealth = 100;
     [SerializeField] private Transform fixedBulletY;
     [SerializeField] private ParticleSystem takeDamageParticle;
-
+    [SerializeField] private bool cheat = false;
     public bool gameReady = true;
     private float shootTimer = 0;
     private WeaponBase currentWeapon;
@@ -66,7 +66,7 @@ public class PlayerController : MonoBehaviour, IDamageable
         else if (!isDeath)
         {
             var bullet = currentWeapon.Fire(transform.rotation.eulerAngles, fixedBulletY.position.y);
-            if (bullet != null )
+            if (bullet != null && bullet.Length > 0)
             {
                 animator.SetBool("IsShooting", true);
                 animator.SetFloat("ShootingSpeed", 1 / currentWeapon.ShootSpeed);
@@ -77,9 +77,12 @@ public class PlayerController : MonoBehaviour, IDamageable
     }
     public void TakeDamage(int amount)
     {
-        currentHealth -= amount;
+#if UNITY_EDITOR
+        if (!cheat)
+#endif
+            currentHealth -= amount;
         onHealthChanged?.Invoke(currentHealth, maxHealth);
-        Debug.Log("TakeDamage: currentHealth = " + currentHealth);
+
         if (!isDeath)
             takeDamageParticle.Play();
 

@@ -27,7 +27,7 @@ Transform:
   m_GameObject: {fileID: 363684439578666190}
   serializedVersion: 2
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: -0, z: -0.0464}
   m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4884,6 +4884,8 @@ MonoBehaviour:
   hitMask:
     serializedVersion: 2
     m_Bits: 320
+  weaponType: 0
+  bulletRadius: 0.02
   speed: 0
 --- !u!1 &3275614383432432419
 GameObject:
@@ -4911,13 +4913,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3275614383432432419}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.03, y: 0.03, z: 0.03}
+  m_LocalScale: {x: 0.04, y: 0.04, z: 0.04}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2793826224231856552}
-  m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &240967617330088686
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -4925,7 +4927,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3275614383432432419}
-  m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
+  m_Mesh: {fileID: 4300000, guid: ad10f620168bbb24ab0bcfcdcb0eaaec, type: 3}
 --- !u!23 &895354150467902126
 MeshRenderer:
   m_ObjectHideFlags: 0

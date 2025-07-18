@@ -16,14 +16,20 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private GameHud gameHud;
     [SerializeField] private CinemachineCamera virtualCamera;
     [SerializeField] private List<WeaponBase> weaponList;
+    [SerializeField] private string backgroundMusic;
+    [SerializeField] private string zombieChaseSfx;
+    [SerializeField] private float timerChaseSfxMin;
+    [SerializeField] private float timerChaseSfxMax;
 
     private List<ZombieController> zombiePolling = new List<ZombieController>();
     
     private MatchState matchState = MatchState.None;
+    private MatchState lastMatchState = MatchState.None;
     private int navMeshAgentPriority = 50;
     private float spawnTimer = 0f;
     private float matchPrepareTime = 3f;
     private float loadingTimer = 0.7f;
+    private float zombieChaseSfxTimer;
     private PlayerController mainPlayer;
     public int totalZombie          { get; private set; }
     public int totalZombieSpawned   { get; private set; }
@@ -45,6 +51,11 @@ public class LevelManager : MonoBehaviour
     {
         UIManager.Instance.UpdateLoadingBar(0.11f);
         matchState++;
+        if (!string.IsNullOrEmpty(backgroundMusic))
+        {
+            SoundManager.Instance.PlayBackgroundMusic(backgroundMusic);
+        }
+        zombieChaseSfxTimer = UnityEngine.Random.Range(timerChaseSfxMin, timerChaseSfxMax);
     }
     void Update()
     {
@@ -85,6 +96,12 @@ public class LevelManager : MonoBehaviour
                 {
                     SpawnNewZombie();
                 }
+                zombieChaseSfxTimer -= Time.deltaTime;
+                if (zombieChaseSfxTimer <= 0f)
+                {
+                    zombieChaseSfxTimer = UnityEngine.Random.Range(timerChaseSfxMin, timerChaseSfxMax);
+                    SoundManager.Instance.PlaySFX(zombieChaseSfx);
+                }
                 break;
             case MatchState.PlayerDeath:
                 UIManager.Instance.SetActiveOnScreenJoyStick(false);
@@ -100,7 +117,13 @@ public class LevelManager : MonoBehaviour
                 matchState = MatchState.End;
                 break;
             case MatchState.End:
+                SoundManager.Instance.StopBackgroundMusic();
                 break;
+        }
+        if (matchState != lastMatchState)
+        {
+            lastMatchState = matchState;
+            OnMatchStateChanged?.Invoke(matchState);
         }
     }
     private void SpawnNewZombie()
