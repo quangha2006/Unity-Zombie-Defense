@@ -54,6 +54,9 @@ MonoBehaviour:
   bulletHorizontalDeviation: 3
   particles:
   - {fileID: 8343414038489866205}
+  shootVfx: AssaultCanon_1p
+  weaponName: smg
+  weaponType: 0
 --- !u!1 &8696925964144830381
 GameObject:
   m_ObjectHideFlags: 0

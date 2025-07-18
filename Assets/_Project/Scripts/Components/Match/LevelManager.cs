@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Unity.Cinemachine;
 using UnityEngine;
+using Weapon;
 
 public class LevelManager : MonoBehaviour
 {
@@ -14,6 +15,7 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private Transform playerSpawnPoint;
     [SerializeField] private GameHud gameHud;
     [SerializeField] private CinemachineCamera virtualCamera;
+    [SerializeField] private List<WeaponBase> weaponList;
 
     private List<ZombieController> zombiePolling = new List<ZombieController>();
     
@@ -21,14 +23,27 @@ public class LevelManager : MonoBehaviour
     private int navMeshAgentPriority = 50;
     private float spawnTimer = 0f;
     private float matchPrepareTime = 3f;
-    private float loadingTimer = 0.5f;
+    private float loadingTimer = 0.7f;
     private PlayerController mainPlayer;
+    public int totalZombie          { get; private set; }
+    public int totalZombieSpawned   { get; private set; }
+    public int totalZombieDeath     { get; private set; }
 
     public event Action<PlayerController> OnPlayerSpawned;
     public event Action<ZombieController> OnZombieSpawned;
     public event Action<MatchState> OnMatchStateChanged;
+    public event Action<int, int> OnZombieDeathChanged;
+
+    private void Awake()
+    {
+        UIManager.Instance.UpdateLoadingBar(0.1f);
+        totalZombie = zombieSpawned.Count + (int)(matchTime / zombieSpawnRate);
+        totalZombieSpawned = zombieSpawned.Count;
+        totalZombieDeath = 0;
+    }
     private void Start()
     {
+        UIManager.Instance.UpdateLoadingBar(0.11f);
         matchState++;
     }
     void Update()
@@ -36,18 +51,23 @@ public class LevelManager : MonoBehaviour
         switch (matchState)
         {
             case MatchState.None:
+                
+                break;
             case MatchState.SpawnPlayer:
+                UIManager.Instance.UpdateLoadingBar(0.2f);
                 SpawnPlayer();
                 break;
             case MatchState.InitZombie:
+                UIManager.Instance.UpdateLoadingBar(0.3f);
                 InitZombies();
                 break;
             case MatchState.LevelInitComplete:
-                UIManager.Instance.UpdateLoadingBar(1f);
+
+                UIManager.Instance.UpdateLoadingBar(0.3f + 0.7f - loadingTimer);
                 loadingTimer -= Time.deltaTime;
                 if (loadingTimer <= 0f)
                 {
-                    UIManager.Instance.SetActiveLoadingScreen(false);
+                    //UIManager.Instance.SetActiveLoadingScreen(false);
                     UIManager.Instance.SetActiveOnScreenJoyStick(true);
                     matchState++;
                 }
@@ -61,9 +81,23 @@ public class LevelManager : MonoBehaviour
                 }
                 break;
             case MatchState.Playing:
-                SpawnNewZombie();
+                if (totalZombieSpawned < totalZombie)
+                {
+                    SpawnNewZombie();
+                }
                 break;
-            case MatchState.TimeUp:
+            case MatchState.PlayerDeath:
+                UIManager.Instance.SetActiveOnScreenJoyStick(false);
+                matchState++;
+                break;
+            case MatchState.Lose:
+                //TODO: Show lose popup
+                matchState = MatchState.End;
+                break;
+            case MatchState.Win:
+                UIManager.Instance.SetActiveOnScreenJoyStick(false);
+                //TODO: Show win popup
+                matchState = MatchState.End;
                 break;
             case MatchState.End:
                 break;
@@ -102,7 +136,9 @@ public class LevelManager : MonoBehaviour
             newZombie.playerTarget = mainPlayer;
             newZombie.NavMeshAgent.avoidancePriority = navMeshAgentPriority++;
             newZombie.gameReady = true;
+            newZombie.onDie += OnZombieDeath;
             zombieSpawned.Add(newZombie);
+            totalZombieSpawned++;
             OnZombieSpawned?.Invoke(newZombie);
         }
     }
@@ -115,6 +151,8 @@ public class LevelManager : MonoBehaviour
             virtualCamera.Follow = mainPlayer.transform;
             virtualCamera.LookAt = mainPlayer.transform;
             mainPlayer.onDeath += OnPlayerDeath;
+            mainPlayer.SetWeapons(weaponList);
+            mainPlayer.levelManager = this;
             matchState++;
         }
         else
@@ -128,6 +166,7 @@ public class LevelManager : MonoBehaviour
         {
             zombie.playerTarget = mainPlayer;
             zombie.NavMeshAgent.avoidancePriority = navMeshAgentPriority++;
+            zombie.onDie += OnZombieDeath;
             OnZombieSpawned?.Invoke(zombie);
         }
         matchState++;
@@ -142,7 +181,16 @@ public class LevelManager : MonoBehaviour
     }
     private void OnPlayerDeath()
     {
-        matchState = MatchState.End;
+        matchState = MatchState.PlayerDeath;
+    }
+    private void OnZombieDeath()
+    {
+        totalZombieDeath++;
+        OnZombieDeathChanged?.Invoke(totalZombieDeath, totalZombie);
+        if (totalZombieDeath >= totalZombie)
+        {
+            matchState = MatchState.Win;
+        }
     }
     public enum MatchState
     {
@@ -152,7 +200,9 @@ public class LevelManager : MonoBehaviour
         LevelInitComplete = 3,
         PlayCutScene = 4,
         Playing = 5,
-        TimeUp = 6,
+        PlayerDeath = 6,
+        Win = 7,
+        Lose = 8,
         End
     }
 }

@@ -21,17 +21,23 @@ public class GameManager : MonoBehaviourSingleton<GameManager>
         if (loadingTimer >= 0f)
         {
             loadingTimer -= Time.deltaTime;
-            UIManager.Instance.UpdateLoadingBar(1f - (loadingTimer / firstLoadingTime));
+            UIManager.Instance.UpdateLoadingBar((1f - (loadingTimer / firstLoadingTime))/10f);
         }
 
-        if (loadingTimer < 0.5f && !isLoadToLobby)
+        if (loadingTimer <= 0f && !isLoadToLobby)
         {
             isLoadToLobby = true;
-            SceneManager.LoadScene("Level-01");
+            SceneManager.LoadScene("LobbyScene");
         }
     }
     private void OnSceneLoaded(Scene scene, LoadSceneMode loadSceneMode)
     {
         
+    }
+    public void StartBattle(string levelname)
+    {
+        UIManager.Instance.UpdateLoadingBar(0f);
+        UIManager.Instance.SetActiveLoadingScreen(true);
+        SceneManager.LoadScene(levelname);
     }
 }

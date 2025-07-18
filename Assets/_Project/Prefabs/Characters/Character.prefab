@@ -53,11 +53,11 @@ MonoBehaviour:
   animator: {fileID: 7174325763479577994}
   shootSpeed: 0.1
   equipweaponsObj: {fileID: 6481898211107650331}
-  weaponPrefab: {fileID: 1283311264585822876, guid: b3a16f38d4b15c24e8aec5fcf8c781d5, type: 3}
   maxHealth: 100
   fixedBulletY: {fileID: 3660788045981211792}
   takeDamageParticle: {fileID: 1838334482011484679}
   gameReady: 1
+  levelManager: {fileID: 0}
 --- !u!114 &6608543438733834529
 MonoBehaviour:
   m_ObjectHideFlags: 0

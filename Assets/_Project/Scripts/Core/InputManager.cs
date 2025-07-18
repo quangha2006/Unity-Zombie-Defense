@@ -46,6 +46,6 @@ public class InputManager : MonoBehaviourSingleton<InputManager>
 
     void OnDisable()
     {
-        characterControlInput.Gameplay.Disable();
+        characterControlInput?.Gameplay.Disable();
     }
 }

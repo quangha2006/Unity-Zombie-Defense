@@ -20,6 +20,7 @@ public class ZombieController : MonoBehaviour, IDamageable
     [SerializeField] private int maxHealth = 100;
     [SerializeField] public bool gameReady = false;
     [SerializeField] private Transform bodyPos;
+    [SerializeField] private string deathVfx;
 
     public PlayerController playerTarget;
     public NavMeshAgent NavMeshAgent => agent;
@@ -262,6 +263,7 @@ public class ZombieController : MonoBehaviour, IDamageable
         if (collider != null)
             collider.enabled = false;
         onDie?.Invoke();
+        SoundManager.Instance.PlaySFX(deathVfx);
         //Play particle and destroy or return to pool
         //Destroy(gameObject, 5f);
     }

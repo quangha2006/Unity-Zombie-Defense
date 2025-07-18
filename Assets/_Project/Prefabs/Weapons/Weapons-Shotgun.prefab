@@ -83,6 +83,9 @@ MonoBehaviour:
   gunBarrelPos: {fileID: 161169526878277291}
   bulletHorizontalDeviation: 3
   particles: []
+  shootVfx: AntiMaterialRifle_3p_03
+  weaponName: Shotgun
+  weaponType: 1
 --- !u!1001 &6076786331405271456
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -9,6 +9,7 @@ public class CharacterMovement : MonoBehaviour
     [SerializeField] public float moveSpeed = 5f;
     [SerializeField] public float rotationSpeed = 10f;
     [SerializeField] public PlayerController playerController;
+    [SerializeField] private bool isInLobby = false;
 
     private CharacterController controller;
     private Transform cameraTransform;
@@ -75,8 +76,14 @@ public class CharacterMovement : MonoBehaviour
                 transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
             }
         }
+        if (!isInLobby)
+        {
+            animator.SetFloat("MoveForward", localMoveDirection.z);
+            animator.SetFloat("MoveRight", localMoveDirection.x);
+        }
+        else
+        {
 
-        animator.SetFloat("MoveForward", localMoveDirection.z);
-        animator.SetFloat("MoveRight", localMoveDirection.x);
+        }
     }
 }
