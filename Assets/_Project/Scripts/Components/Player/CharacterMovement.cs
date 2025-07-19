@@ -27,7 +27,7 @@ public class CharacterMovement : MonoBehaviour
     void Update()
     {
         Vector3 localMoveDirection = Vector3.zero;
-        if (playerController.gameReady)
+        if (playerController.gameReady && !playerController.isDeath)
         {
             Vector2 moveInput = InputManager.Instance.GetMoveInput();
             Vector2 shootInput = InputManager.Instance.GetShootDirection();

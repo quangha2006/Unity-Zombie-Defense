@@ -36,7 +36,7 @@ public class InputManager : MonoBehaviourSingleton<InputManager>
 
     public bool GetShootButton()
     {
-        return shootDirectionJoystick.IsPressed;// || characterControlInput.Gameplay.Shoot.ReadValue<bool>();
+        return shootDirectionJoystick.IsPressed;
     }
 
     void OnEnable()

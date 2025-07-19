@@ -7,6 +7,7 @@ public class ParticlePool : MonoBehaviourSingleton<ParticlePool>
     [SerializeField] private ParticleSystem hitWallFXPrefab;
     [SerializeField] private ParticleSystem hitZombieFXPrefab;
     [SerializeField] private ParticleSystem bulletExplosionPrefab;
+    [SerializeField] private ParticleSystem grenadeFXPrefab;
 
     [SerializeField] private int poolSizePerType = 10;
 
@@ -19,6 +20,7 @@ public class ParticlePool : MonoBehaviourSingleton<ParticlePool>
         prefabDict[ParticleType.HitWall] = hitWallFXPrefab;
         prefabDict[ParticleType.HitZombie] = hitZombieFXPrefab;
         prefabDict[ParticleType.BulletShotgunExplosive] = bulletExplosionPrefab;
+        prefabDict[ParticleType.GrenadeExplosive] = grenadeFXPrefab;
 
         foreach (var type in prefabDict.Keys)
         {
@@ -29,10 +31,15 @@ public class ParticlePool : MonoBehaviourSingleton<ParticlePool>
                 ParticleSystem fx = Instantiate(prefabDict[type], transform);
                 fx.gameObject.SetActive(false);
                 queue.Enqueue(fx);
+                // Skip if Grenade
+                if (type == ParticleType.GrenadeExplosive)
+                    break;
             }
 
             poolDict[type] = queue;
         }
+
+
     }
 
     public void PlayFX(ParticleType type, Vector3 position, Quaternion rotation)
@@ -66,5 +73,5 @@ public class ParticlePool : MonoBehaviourSingleton<ParticlePool>
         fx.gameObject.SetActive(false);
         poolDict[type].Enqueue(fx);
     }
-    public enum ParticleType { HitWall, HitZombie, BulletShotgunExplosive }
+    public enum ParticleType { HitWall, HitZombie, BulletShotgunExplosive, GrenadeExplosive }
 }

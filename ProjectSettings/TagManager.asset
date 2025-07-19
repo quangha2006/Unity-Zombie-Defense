@@ -8,6 +8,7 @@ TagManager:
   - CinemachineTarget
   - FxTemporaire
   - Obstacle
+  - Terrain
   layers:
   - Default
   - TransparentFX
@@ -20,7 +21,7 @@ TagManager:
   - Obstacle
   - Terrain
   - ZombieArm
-  - 
+  - Grenade
   - 
   - 
   - 

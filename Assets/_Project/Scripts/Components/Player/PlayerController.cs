@@ -10,6 +10,7 @@ public class PlayerController : MonoBehaviour, IDamageable
     [SerializeField] private Animator animator;
     [SerializeField] private float shootSpeed = 0.1f;
     [SerializeField] private GameObject equipweaponsObj;
+    [SerializeField] private GameObject grenadePos;
     [SerializeField] private int maxHealth = 100;
     [SerializeField] private Transform fixedBulletY;
     [SerializeField] private ParticleSystem takeDamageParticle;
@@ -21,7 +22,7 @@ public class PlayerController : MonoBehaviour, IDamageable
 
     public int health => currentHealth;
     public int MaxHealth => maxHealth;
-
+    public Vector3 GrenadePos => grenadePos.transform.position;
     public event Action<int, int> onHealthChanged;
     public event Action onDeath;
     public event Action<string> OnWeaponChanged;
@@ -33,6 +34,8 @@ public class PlayerController : MonoBehaviour, IDamageable
     public string currentWeaponName => currentWeapon?.WeaponName ?? null;
     public LevelManager levelManager;
     private LevelManager.MatchState currentMatchState = LevelManager.MatchState.None;
+    private bool wasPressedFireLastFrame = false;
+
     void Awake()
     {
         isDeath = false;
@@ -56,16 +59,32 @@ public class PlayerController : MonoBehaviour, IDamageable
             LoadWeapon(weaponList.First().WeaponName);
         }
 
-        if (!gameReady || currentWeapon == null || currentMatchState > LevelManager.MatchState.Playing)
+        if (!gameReady || currentWeapon == null)
+        {
             return;
-
-        if (!InputManager.Instance.GetShootButton())
-        {
-            animator.SetBool("IsShooting", false);
         }
-        else if (!isDeath)
+
+        if (currentMatchState > LevelManager.MatchState.Playing)
         {
-            var bullet = currentWeapon.Fire(transform.rotation.eulerAngles, fixedBulletY.position.y);
+            if(wasPressedFireLastFrame)
+            {
+                wasPressedFireLastFrame = false;
+                currentWeapon.StopFire();
+            }
+            return;
+        }
+
+        var isFirePressed = InputManager.Instance.GetShootButton();
+
+        if (!isFirePressed && wasPressedFireLastFrame)
+        {
+            currentWeapon.StopFire();
+        }
+
+        if (!isDeath && isFirePressed)
+        {
+            wasPressedFireLastFrame = true;
+            var bullet = currentWeapon.Fire(transform);
             if (bullet != null && bullet.Length > 0)
             {
                 animator.SetBool("IsShooting", true);
@@ -73,6 +92,11 @@ public class PlayerController : MonoBehaviour, IDamageable
                 return;
             }
         }
+        else
+        {
+            wasPressedFireLastFrame = false;
+        }
+
         animator.SetBool("IsShooting", false);
     }
     public void TakeDamage(int amount)
@@ -80,24 +104,28 @@ public class PlayerController : MonoBehaviour, IDamageable
 #if UNITY_EDITOR
         if (!cheat)
 #endif
-            currentHealth -= amount;
-        onHealthChanged?.Invoke(currentHealth, maxHealth);
+            if (!isDeath)
+            {
+                Debug.Log("Player take damage: " + amount);
+                currentHealth -= amount;
+                onHealthChanged?.Invoke(currentHealth, maxHealth);
 
-        if (!isDeath)
-            takeDamageParticle.Play();
+                takeDamageParticle.Play();
 
-        if (currentHealth <= 0)
-        {
-            Die();
-        }
+                if (currentHealth <= 0)
+                {
+                    Die();
+                }
+            }
     }
 
     void Die()
     {
         isDeath = true;
         onDeath?.Invoke();
+        animator.SetLayerWeight(1, 0);
+        animator.SetTrigger("IsDeath");
         // TODO: invoke die callback to level manager.
-        // TODO: trigger death animation, game over...
     }
 
     public void LoadWeapon(string name)
@@ -117,6 +145,7 @@ public class PlayerController : MonoBehaviour, IDamageable
             if (!weaponLoaded.ContainsKey(name))
             {
                 weaponLoaded[name] = Instantiate(weaponPrefab, equipweaponsObj.transform);
+                weaponLoaded[name].SetPlayer(this);
             }
             currentWeapon = weaponLoaded[name];
             currentWeapon.gameObject.SetActive(true);

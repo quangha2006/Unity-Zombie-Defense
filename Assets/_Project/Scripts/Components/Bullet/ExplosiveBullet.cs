@@ -4,7 +4,7 @@ public class ExplosiveBullet : BulletBase
 {
     [SerializeField] private int explosiveDamage;
     [SerializeField] public float explosionRadius = 1f;
-    [SerializeField] private LayerMask affectLayer;
+    [SerializeField] private LayerMask affectedLayer;
     protected override bool BulletUpdate(out RaycastHit hit)
     {
         var isReturnPool = base.BulletUpdate(out hit);
@@ -12,7 +12,7 @@ public class ExplosiveBullet : BulletBase
         {
             ParticlePool.Instance.PlayFX(ParticlePool.ParticleType.BulletShotgunExplosive, hit.point, Quaternion.identity);
 
-            Collider[] hitColliders = Physics.OverlapSphere(transform.position, explosionRadius, affectLayer);
+            Collider[] hitColliders = Physics.OverlapSphere(transform.position, explosionRadius, affectedLayer);
 
             foreach (var hitCol in hitColliders)
             {

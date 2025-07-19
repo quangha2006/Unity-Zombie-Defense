@@ -7,21 +7,22 @@ namespace Weapon
     {
         private bool isPlayLoopingSFX = false;
 
-        private void LateUpdate()
-        {
-            if (!isFiring && isPlayLoopingSFX)
-            {
-                isPlayLoopingSFX = false;
-                SoundManager.Instance.StopLoopingSFX();
-            }
-        }
+
         protected override void PlayVfx()
         {
             if (!isPlayLoopingSFX)
             {
-                //UnityEngine.Debug.Log("PlayVfx: " + shootVfx);
+                UnityEngine.Debug.Log("PlayVfx: " + shootVfx);
                 isPlayLoopingSFX = true;
                 SoundManager.Instance.PlayLoopingSFX(shootVfx, 0.3f);
+            }
+        }
+        public override void StopFire()
+        {
+            if (isPlayLoopingSFX)
+            {
+                isPlayLoopingSFX = false;
+                SoundManager.Instance.StopLoopingSFX();
             }
         }
         private void OnDisable()

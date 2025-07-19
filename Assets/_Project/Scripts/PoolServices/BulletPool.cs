@@ -5,6 +5,7 @@ public class BulletPool : MonoBehaviourSingleton<BulletPool>
 {
     [SerializeField] private BulletBase bulletSMGPrefab;
     [SerializeField] private BulletBase bulletShotGunPrefab;
+    [SerializeField] private BulletBase grenadePrefab;
     [SerializeField] private int initQueue = 10;
 
     private Dictionary<WeaponType, Queue<BulletBase>> bulletDic = new Dictionary<WeaponType, Queue<BulletBase>>();
@@ -25,7 +26,11 @@ public class BulletPool : MonoBehaviourSingleton<BulletPool>
             bulletShotGun.gameObject.SetActive(false);
             bulletDic[WeaponType.SHOTGUN].Enqueue(bulletShotGun);
         }
-
+        //Specific for grenade
+        bulletDic[WeaponType.GRENADE] = new Queue<BulletBase>();
+        BulletBase grenade = Instantiate(grenadePrefab);
+        grenade.gameObject.SetActive(false);
+        bulletDic[WeaponType.GRENADE].Enqueue(grenade);
     }
 
     public BulletBase GetBullet(WeaponType weaponType)
@@ -38,13 +43,20 @@ public class BulletPool : MonoBehaviourSingleton<BulletPool>
             {
                 bullet = queuePool.Dequeue();
             }
-            else if (weaponType == WeaponType.SMG)
+            else
             {
-                bullet = Instantiate(bulletSMGPrefab);
-            }
-            else if (weaponType == WeaponType.SHOTGUN)
-            {
-                bullet = Instantiate(bulletShotGunPrefab);
+                switch (weaponType)
+                {
+                    case WeaponType.GRENADE:
+                        bullet = Instantiate(grenadePrefab);
+                        break;
+                    case WeaponType.SMG:
+                        bullet = Instantiate(bulletSMGPrefab);
+                        break;
+                    case WeaponType.SHOTGUN:
+                        bullet = Instantiate(bulletShotGunPrefab);
+                        break;
+                };
             }
             return bullet;
         }

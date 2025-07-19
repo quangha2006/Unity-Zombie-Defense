@@ -150,6 +150,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bulletSMGPrefab: {fileID: 583054988679833560, guid: bd8952261810a3545b8d879356f9b6a6, type: 3}
   bulletShotGunPrefab: {fileID: 5510900373427648309, guid: 27b4df4bbdba62242a4dde869c8d050e, type: 3}
+  grenadePrefab: {fileID: 2672386121275332981, guid: 39b266631205ae3448dd20fb51d5400b, type: 3}
   initQueue: 10
 --- !u!4 &110044696
 Transform:
@@ -950,6 +951,7 @@ MonoBehaviour:
   hitWallFXPrefab: {fileID: 19800002, guid: e74af37e539075d428c1f7bd8cdb781d, type: 3}
   hitZombieFXPrefab: {fileID: 198722778290592648, guid: 01afa85b461d4dc49ba4530e39b61739, type: 3}
   bulletExplosionPrefab: {fileID: 19800014, guid: a57a6829db3568c4d9bdc37e9e63c017, type: 3}
+  grenadeFXPrefab: {fileID: 19800008, guid: fafeb973cad62304ba2abdc5dfafbf8f, type: 3}
   poolSizePerType: 10
 --- !u!4 &485989082
 Transform:
@@ -1546,7 +1548,7 @@ GameObject:
   - component: {fileID: 829074091}
   m_Layer: 9
   m_Name: Terrain
-  m_TagString: Untagged
+  m_TagString: Terrain
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2700,7 +2702,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 15735f7445a653b429e49e17b881886b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  matchTime: 60
+  matchTime: 2
   zombiePrefabs:
   - {fileID: 7636460318945636551, guid: 4d99d47e6e48a714c895368aed8a8fa6, type: 3}
   - {fileID: 1597688629965111987, guid: 58010afa410de60439c677c48f6f24a7, type: 3}
@@ -2721,6 +2723,7 @@ MonoBehaviour:
   weaponList:
   - {fileID: -3612652870143421931, guid: 9d60ccb4582b85b479bba130b058cfc3, type: 3}
   - {fileID: 1283311264585822876, guid: b3a16f38d4b15c24e8aec5fcf8c781d5, type: 3}
+  - {fileID: 7593510778292563965, guid: eadb7f93b20a6e3469a2bdf9b9e3bf37, type: 3}
   backgroundMusic: Music_Main
   zombieChaseSfx: zombie_agressive_039
   timerChaseSfxMin: 3

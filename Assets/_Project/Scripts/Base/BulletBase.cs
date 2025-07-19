@@ -5,7 +5,7 @@ using static UnityEngine.UI.Image;
 public class BulletBase : MonoBehaviour
 {
     [SerializeField] private float maxDistance = 100f;
-    [SerializeField] private int damage = 10;
+    [SerializeField] protected int damage = 10;
     [SerializeField] public LayerMask hitMask;
     [SerializeField] public WeaponType weaponType;
     [SerializeField] public float bulletRadius;
@@ -14,10 +14,6 @@ public class BulletBase : MonoBehaviour
     private Vector3 lastPosition;
     private float traveledDistance = 0f;
 
-    void Start()
-    {
-        ResetBullet();
-    }
 
     protected virtual void Update()
     {
@@ -72,14 +68,13 @@ public class BulletBase : MonoBehaviour
         return false;
     }
 
-    public void ResetBullet()
-    {
-        traveledDistance = 0f;
-        lastPosition = transform.position;
-    }
-
     protected void ReturnToPool()
     {
         BulletPool.Instance.ReturnBullet(this);
+    }
+    private void OnEnable()
+    {
+        traveledDistance = 0f;
+        lastPosition = transform.position;
     }
 }

@@ -3,13 +3,25 @@
     "SubFolders": true,
     "OverwriteConfig": false,
     "LoadAllShaders": false,
-    "CustomOutputPath": "/JMO Assets/Toony Colors Pro/Shaders Generated/",
+    "CustomOutputPath": "_Project/Data/Shader",
     "LastImplementationExportImportPath": "C:/UnityProject/Unity-Zombie/Assets",
-    "OpenedFoldouts": [],
-    "UseCustomFont": false,
+    "OpenedFoldouts": [
+        "TRANSPARENCY/BLENDING",
+        "LIGHTING",
+        "SURFACE",
+        "STYLIZATION",
+        "TERRAIN",
+        "SPECIAL EFFECTS",
+        "SHADER STATES",
+        "OPTIONS",
+        "THIRD PARTY PLUGINS"
+    ],
+    "UseCustomFont": true,
     "CustomFont": {
-        "instanceID": 0
+        "fileID": 12800000,
+        "guid": "8a406076b7de34849be1f35585875a66",
+        "type": 3
     },
-    "CustomFontInitialized": false,
+    "CustomFontInitialized": true,
     "Upgrade_Hybrid1toHybrid2_Done": true
 }
