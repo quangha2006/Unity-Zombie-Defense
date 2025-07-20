@@ -13,7 +13,7 @@ namespace Weapon
         [SerializeField] private ParticleSystem[] particles;
         [SerializeField] protected string shootVfx;
         [SerializeField] private string weaponName;
-        [SerializeField] private WeaponType weaponType;
+        [SerializeField] public WeaponType weaponType;
 
         public float ShootSpeed => shootSpeed;
         public string WeaponName => weaponName;

@@ -12,6 +12,10 @@ Shader "Toony Colors Pro 2/User/GrenadeIndicator"
 		[MainTexture] _BaseMap ("Albedo", 2D) = "white" {}
 		[TCP2Separator]
 
+		[Enum(ToonyColorsPro.ShaderGenerator.DepthWrite)] _depthWrite ("Depth Write", Float) = 1
+		[Enum(ToonyColorsPro.ShaderGenerator.CompareFunction)] _depthTest ("Depth Test", Float) = 4
+		[Enum(ToonyColorsPro.ShaderGenerator.Culling)] _faceCulling ("Face Culling", Float) = 2
+
 		// Avoid compile error if the properties are ending with a drawer
 		[HideInInspector] __dummy__ ("unused", Float) = 0
 	}
@@ -73,8 +77,9 @@ Shader "Toony Colors Pro 2/User/GrenadeIndicator"
 				"LightMode"="UniversalForward"
 			}
 			Blend SrcAlpha OneMinusSrcAlpha
-			ZWrite On
-			Cull Back
+			ZWrite [_depthWrite]
+			ZTest [_depthTest]
+			Cull [_faceCulling]
 
 			Stencil
 			{
@@ -373,7 +378,7 @@ Shader "Toony Colors Pro 2/User/GrenadeIndicator"
 
 			ZWrite On
 			ColorMask 0
-			Cull Back
+			Cull [_faceCulling]
 
 			HLSLPROGRAM
 
@@ -401,5 +406,5 @@ Shader "Toony Colors Pro 2/User/GrenadeIndicator"
 	CustomEditor "ToonyColorsPro.ShaderGenerator.MaterialInspector_SG2"
 }
 
-/* TCP_DATA u config(unity:"6000.0.47f1";ver:"2.9.0";tmplt:"SG2_Template_URP";features:list["UNITY_5_4","UNITY_5_5","UNITY_5_6","UNITY_2017_1","UNITY_2018_1","UNITY_2018_2","UNITY_2018_3","UNITY_2019_1","UNITY_2019_2","UNITY_2019_3","UNITY_2019_4","UNITY_2020_1","UNITY_2021_1","TEMPLATE_LWRP","ALPHA_BLENDING","SHADER_BLENDING","NO_RAMP_UNLIT","CULLING","ZWRITE","STENCIL","DISABLE_SHADOW_RECEIVING","DISABLE_SHADOW_CASTING","DISABLE_ADDITIONAL_LIGHTS"];flags:list[];flags_extra:dict[];keywords:dict[RENDER_TYPE="Opaque",RampTextureDrawer="[TCP2Gradient]",RampTextureLabel="Ramp Texture",SHADER_TARGET="3.0"];shaderProperties:list[];customTextures:list[];codeInjection:codeInjection(injectedFiles:list[];mark:False);matLayers:list[]) */
-/* TCP_HASH c04ac08255d3d7b58323c1048b74e0d5 */
+/* TCP_DATA u config(unity:"6000.0.47f1";ver:"2.9.0";tmplt:"SG2_Template_URP";features:list["UNITY_5_4","UNITY_5_5","UNITY_5_6","UNITY_2017_1","UNITY_2018_1","UNITY_2018_2","UNITY_2018_3","UNITY_2019_1","UNITY_2019_2","UNITY_2019_3","UNITY_2019_4","UNITY_2020_1","UNITY_2021_1","ALPHA_BLENDING","SHADER_BLENDING","NO_RAMP_UNLIT","CULLING","ZWRITE","STENCIL","DISABLE_SHADOW_RECEIVING","DISABLE_SHADOW_CASTING","DISABLE_ADDITIONAL_LIGHTS","ZTEST","TEMPLATE_LWRP"];flags:list[];flags_extra:dict[];keywords:dict[RENDER_TYPE="Opaque",RampTextureDrawer="[TCP2Gradient]",RampTextureLabel="Ramp Texture",SHADER_TARGET="3.0"];shaderProperties:list[,,,,,,sp(name:"Depth Write";imps:list[imp_enum(value_type:1;value:0;enum_type:"ToonyColorsPro.ShaderGenerator.DepthWrite";guid:"69945b27-58c8-4066-b1d8-70e92792d389";op:Multiply;lbl:"Depth Write";gpu_inst:False;locked:False;impl_index:0)];layers:list[];unlocked:list[];clones:dict[];isClone:False),sp(name:"Depth Test";imps:list[imp_enum(value_type:1;value:2;enum_type:"ToonyColorsPro.ShaderGenerator.CompareFunction";guid:"0095b763-9be6-4f6e-bd80-42314dac9ec6";op:Multiply;lbl:"Depth Test";gpu_inst:False;locked:False;impl_index:0)];layers:list[];unlocked:list[];clones:dict[];isClone:False),sp(name:"Face Culling";imps:list[imp_enum(value_type:1;value:0;enum_type:"ToonyColorsPro.ShaderGenerator.Culling";guid:"b0ea6930-1535-4b52-a7b8-2be3ebb64322";op:Multiply;lbl:"Face Culling";gpu_inst:False;locked:False;impl_index:0)];layers:list[];unlocked:list[];clones:dict[];isClone:False)];customTextures:list[];codeInjection:codeInjection(injectedFiles:list[];mark:False);matLayers:list[]) */
+/* TCP_HASH 0cb6c3410fb9a573bcf3a7363e18ea71 */

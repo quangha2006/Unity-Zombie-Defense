@@ -52,7 +52,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   animator: {fileID: 7174325763479577994}
   shootSpeed: 0.1
-  equipweaponsObj: {fileID: 6481898211107650331}
+  equipGunsObj: {fileID: 3430104670044164018}
+  equipGrenadeObj: {fileID: 7696670796602142518}
   grenadePos: {fileID: 2613644345230783211}
   maxHealth: 100
   fixedBulletY: {fileID: 3660788045981211792}

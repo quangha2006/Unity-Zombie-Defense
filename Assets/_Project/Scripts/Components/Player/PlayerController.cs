@@ -9,7 +9,8 @@ public class PlayerController : MonoBehaviour, IDamageable
 {
     [SerializeField] private Animator animator;
     [SerializeField] private float shootSpeed = 0.1f;
-    [SerializeField] private GameObject equipweaponsObj;
+    [SerializeField] private Transform equipGunsObj;
+    [SerializeField] private Transform equipGrenadeObj;
     [SerializeField] private GameObject grenadePos;
     [SerializeField] private int maxHealth = 100;
     [SerializeField] private Transform fixedBulletY;
@@ -144,7 +145,12 @@ public class PlayerController : MonoBehaviour, IDamageable
             }
             if (!weaponLoaded.ContainsKey(name))
             {
-                weaponLoaded[name] = Instantiate(weaponPrefab, equipweaponsObj.transform);
+                Transform parent = equipGunsObj;
+                if (weaponPrefab.weaponType == WeaponType.GRENADE)
+                {
+                    parent = equipGrenadeObj;
+                }
+                weaponLoaded[name] = Instantiate(weaponPrefab, parent);
                 weaponLoaded[name].SetPlayer(this);
             }
             currentWeapon = weaponLoaded[name];
