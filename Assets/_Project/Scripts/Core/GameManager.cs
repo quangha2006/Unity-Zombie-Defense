@@ -3,7 +3,11 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviourSingleton<GameManager>
 {
+    private const string LobbySceneName = "LobbyScene";
+
     [SerializeField] private float firstLoadingTime;
+    [SerializeField] private string[] levelName;
+
     private bool isLoadToLobby = false;
     private float loadingTimer;
     protected override void Awake()
@@ -14,6 +18,7 @@ public class GameManager : MonoBehaviourSingleton<GameManager>
     void Start()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
+        SceneManager.sceneUnloaded += OnSceneUnloaded;
         loadingTimer = firstLoadingTime;
     }
     private void Update()
@@ -27,17 +32,38 @@ public class GameManager : MonoBehaviourSingleton<GameManager>
         if (loadingTimer <= 0f && !isLoadToLobby)
         {
             isLoadToLobby = true;
-            SceneManager.LoadScene("LobbyScene");
+            SceneManager.LoadScene(LobbySceneName);
         }
     }
     private void OnSceneLoaded(Scene scene, LoadSceneMode loadSceneMode)
     {
         
     }
-    public void StartBattle(string levelname)
+
+    private void OnSceneUnloaded(Scene scene)
+    {
+        UIManager.Instance.ResetUI();
+    }
+
+    public bool LoadMatchLevel(int level, out string errorMessage)
+    {
+        errorMessage = string.Empty;
+        if (level <= 0 || level > levelName.Length)
+        {
+            errorMessage = "Level not found.";
+            return false;
+        }
+        var sceneName = levelName[level - 1];
+        UIManager.Instance.UpdateLoadingBar(0f);
+        UIManager.Instance.SetActiveLoadingScreen(true);
+        SceneManager.LoadScene(sceneName);
+        return true;
+    }
+
+    public void LoadLobbyScene()
     {
         UIManager.Instance.UpdateLoadingBar(0f);
         UIManager.Instance.SetActiveLoadingScreen(true);
-        SceneManager.LoadScene(levelname);
+        SceneManager.LoadScene(LobbySceneName);
     }
 }

@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using Weapon;
 
 public class WeaponUIController : MonoBehaviour
 {
@@ -55,7 +56,7 @@ public class WeaponUIController : MonoBehaviour
             var currentWeaponName = currentPlayer.currentWeaponName;
             if (!string.IsNullOrEmpty(currentWeaponName))
             {
-                OnWeaponSwitch(currentWeaponName);
+                OnWeaponChanged(currentWeaponName);
             }
             isWeaponNameSetted = true;
         }
@@ -77,10 +78,15 @@ public class WeaponUIController : MonoBehaviour
     {
         isWeaponNameSetted = false;
         currentPlayer = player;
-        currentPlayer.OnWeaponChanged += OnWeaponSwitch;
+        currentPlayer.onWeaponChanged += OnWeaponChanged;
     }
 
-    private void OnWeaponSwitch(string weaponName)
+    private void OnWeaponChanged(WeaponBase weapon)
+    {
+        var weaponName = weapon.WeaponName;
+        OnWeaponChanged(weaponName);
+    }
+    private void OnWeaponChanged(string weaponName)
     {
         if (!string.IsNullOrEmpty(weaponLeftName))
         {

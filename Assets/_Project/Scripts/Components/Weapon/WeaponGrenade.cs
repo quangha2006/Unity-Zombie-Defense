@@ -13,47 +13,55 @@ namespace Weapon
         [SerializeField] float throwAngle = 45f;
         [SerializeField] private LayerMask obstacleLayer;
         [SerializeField] private float minDistance = 0.4f;
+
         private bool isAniming = false;
         private Vector3 lastVelocity = Vector3.zero;
+        private BulletGrenade grenadePrepare;
 
         private void Awake()
         {
             SetActiveIndicator(false);
         }
-        protected override void Update()
-        {
 
-        }
-        public override void StopFire()
+        public override BulletBase StopFire()
         {
             if (isAniming)
             {
+                shootTimer = shootSpeed;
                 isAniming = false;
                 SetActiveIndicator(false);
-                ThrowGrenade(lastVelocity);
+                grenadePrepare = BulletPool.Instance.GetBullet(WeaponType.GRENADE) as BulletGrenade;
+                grenadePrepare.transform.rotation = Quaternion.identity;
+                grenadePrepare.ApplyVelocity(lastVelocity);
+                return grenadePrepare;
             }
+            return null;
         }
-        public void ThrowGrenade(Vector3 velocity)
+        public void ThrowGrenade()
         {
-            Debug.Log("ThrowGrenade");
-            BulletGrenade grenade = BulletPool.Instance.GetBullet(WeaponType.GRENADE) as BulletGrenade;
-            grenade.transform.position = player.GrenadePos;
-            grenade.transform.rotation = Quaternion.identity;
-            grenade.ApplyVelocity(velocity);
-            grenade.gameObject.SetActive(true);
+            if (grenadePrepare != null)
+            {
+                grenadePrepare.transform.position = player.GrenadePos;
+
+                grenadePrepare.gameObject.SetActive(true);
+                grenadePrepare = null;
+            }
         }
         public override BulletBase[] Fire(Transform playerTrans)
         {
+            if (shootTimer > 0f)
+                return null;
+
             var input = InputManager.Instance.GetShootDirection();
 
             if (input.magnitude > minDistance)
             {
                 isAniming = true;
-                Vector3 dir = new Vector3(input.x, 0, input.y).normalized;
-                float force = Mathf.Min(input.magnitude * maxThrowForce, maxThrowForce);
+                var dir = new Vector3(input.x, 0, input.y).normalized;
+                var force = Mathf.Min(input.magnitude * maxThrowForce, maxThrowForce);
 
                 lastVelocity = CalculateVelocity(dir, force);
-                Vector3 targetPos = SimulateParabola(player.GrenadePos, lastVelocity, out var pathPoints);
+                var targetPos = SimulateParabola(player.GrenadePos, lastVelocity, out var pathPoints);
 
                 indicator.position = targetPos;
                 SetActiveIndicator(true);
@@ -66,17 +74,17 @@ namespace Weapon
             }
             return null;
         }
-        Vector3 CalculateVelocity(Vector3 dir, float force)
+        private Vector3 CalculateVelocity(Vector3 dir, float force)
         {
             return dir * force + Vector3.up * (force * Mathf.Tan(throwAngle * Mathf.Deg2Rad));
         }
-        Vector3 SimulateParabola(Vector3 pos, Vector3 velocity, out Vector3[] points)
+        private Vector3 SimulateParabola(Vector3 pos, Vector3 velocity, out Vector3[] points)
         {
-            float timestep = 0.1f;
+            var timestep = 0.1f;
             int maxSteps = 30;
             Vector3 gravity = Physics.gravity;
-            List<Vector3> pointList = new List<Vector3>(maxSteps);
-            Vector3 prevPos = pos;
+            var pointList = new List<Vector3>(maxSteps);
+            var prevPos = pos;
 
             for (int i = 0; i < maxSteps; i++)
             {
@@ -103,7 +111,7 @@ namespace Weapon
             return pointList.Last();
         }
 
-        void DrawArc(Vector3[] points)
+        private void DrawArc(Vector3[] points)
         {
             arcRenderer.positionCount = points.Length;
             arcRenderer.SetPositions(points);

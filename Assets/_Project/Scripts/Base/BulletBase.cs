@@ -32,11 +32,11 @@ public class BulletBase : MonoBehaviour
             return false;
         }
 
-        float distanceThisFrame = speed * Time.deltaTime;
-        Vector3 currentPosition = transform.position + transform.forward * distanceThisFrame;
+        var distanceThisFrame = speed * Time.deltaTime;
+        var currentPosition = transform.position + transform.forward * distanceThisFrame;
         //RaycastHit hit;
         //Debug.DrawLine(lastPosition, currentPosition, Color.red, 100.0f);
-        Ray ray = new Ray(lastPosition, (currentPosition - lastPosition).normalized);
+        var ray = new Ray(lastPosition, (currentPosition - lastPosition).normalized);
         if (Physics.SphereCast(ray, bulletRadius, out hit, distanceThisFrame, hitMask))
         {
             if (hit.collider.CompareTag("Zombie"))

@@ -1,8 +1,10 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.TextCore.Text;
 using Weapon;
 
 public class PlayerController : MonoBehaviour, IDamageable
@@ -16,8 +18,8 @@ public class PlayerController : MonoBehaviour, IDamageable
     [SerializeField] private Transform fixedBulletY;
     [SerializeField] private ParticleSystem takeDamageParticle;
     [SerializeField] private bool cheat = false;
+    [SerializeField] private float shootAngleTolerance = 10f;
     public bool gameReady = true;
-    private float shootTimer = 0;
     private WeaponBase currentWeapon;
     private int currentHealth;
 
@@ -26,31 +28,39 @@ public class PlayerController : MonoBehaviour, IDamageable
     public Vector3 GrenadePos => grenadePos.transform.position;
     public event Action<int, int> onHealthChanged;
     public event Action onDeath;
-    public event Action<string> OnWeaponChanged;
+    public event Action<WeaponBase> onWeaponChanged;
 
     private List<WeaponBase> weaponList;
     private Dictionary<string, WeaponBase> weaponLoaded;
 
     public bool isDeath { get; private set; }
     public string currentWeaponName => currentWeapon?.WeaponName ?? null;
+    private bool isThrowingGrenade;
+    public bool forceKeepRotation => isThrowingGrenade;
     public LevelManager levelManager;
     private LevelManager.MatchState currentMatchState = LevelManager.MatchState.None;
     private bool wasPressedFireLastFrame = false;
+    private Coroutine currentAnimHasGunLerp;
+    private float lerpHasGunDuration = 0.25f;
+    public bool canMove => gameReady && !isDeath && currentMatchState == LevelManager.MatchState.Playing;
 
+    private const string AnimParmName_HasGun = "HasGun";
     void Awake()
     {
         isDeath = false;
+        isThrowingGrenade = false;
         currentHealth = maxHealth;
         weaponLoaded = new Dictionary<string, WeaponBase>();
+        onWeaponChanged += OnWeaponChanged;
     }
 
     void Start()
     {
-        shootTimer = shootSpeed;
         if (levelManager != null)
         {
             levelManager.OnMatchStateChanged += OnMatchStateChanged;
         }
+        animator.SetFloat(AnimParmName_HasGun, 0);
     }
 
     void Update()
@@ -76,21 +86,32 @@ public class PlayerController : MonoBehaviour, IDamageable
         }
 
         var isFirePressed = InputManager.Instance.GetShootButton();
+        var shootInput = InputManager.Instance.GetShootDirection();
+        var shootInputDirection = new Vector3(shootInput.x, 0, shootInput.y).normalized;
+        Vector3 currentDir = transform.forward;
+        float angleCharacterAndJoystick = Vector3.Angle(currentDir, shootInputDirection);
 
         if (!isFirePressed && wasPressedFireLastFrame)
         {
-            currentWeapon.StopFire();
+            var bullet = currentWeapon.StopFire();
+            if (bullet is BulletGrenade)
+            {
+                StartCoroutine(ThrowGrenade());
+            }
         }
 
         if (!isDeath && isFirePressed)
         {
-            wasPressedFireLastFrame = true;
-            var bullet = currentWeapon.Fire(transform);
-            if (bullet != null && bullet.Length > 0)
+            if (wasPressedFireLastFrame  || angleCharacterAndJoystick <= shootAngleTolerance)
             {
-                animator.SetBool("IsShooting", true);
-                animator.SetFloat("ShootingSpeed", 1 / currentWeapon.ShootSpeed);
-                return;
+                wasPressedFireLastFrame = true;
+                var bullet = currentWeapon.Fire(transform);
+                if (bullet != null && bullet.Length > 0)
+                {
+                    animator.SetBool("IsShooting", true);
+                    animator.SetFloat("ShootingSpeed", 1 / currentWeapon.ShootSpeed);
+                    return;
+                }
             }
         }
         else
@@ -107,7 +128,6 @@ public class PlayerController : MonoBehaviour, IDamageable
 #endif
             if (!isDeath)
             {
-                Debug.Log("Player take damage: " + amount);
                 currentHealth -= amount;
                 onHealthChanged?.Invoke(currentHealth, maxHealth);
 
@@ -135,7 +155,10 @@ public class PlayerController : MonoBehaviour, IDamageable
         {
             Debug.LogError("LoadWeapon Without name");
         }
-
+        if (isThrowingGrenade || (currentWeapon != null && currentWeapon.WeaponName == name))
+        {
+            return;
+        }
         var weaponPrefab = weaponList.Where(i => i.WeaponName == name).FirstOrDefault();
         if (weaponPrefab != null)
         {
@@ -155,7 +178,7 @@ public class PlayerController : MonoBehaviour, IDamageable
             }
             currentWeapon = weaponLoaded[name];
             currentWeapon.gameObject.SetActive(true);
-            OnWeaponChanged?.Invoke(currentWeapon.WeaponName);
+            onWeaponChanged?.Invoke(currentWeapon);
         }
         else
         {
@@ -178,5 +201,53 @@ public class PlayerController : MonoBehaviour, IDamageable
     private void OnMatchStateChanged(LevelManager.MatchState matchType)
     {
         currentMatchState = matchType;
+    }
+    private void OnWeaponChanged(WeaponBase weapon)
+    {
+        switch(weapon.weaponType)
+        {
+            case WeaponType.GRENADE:
+                StartAnimHasGunLerpTo(0f);
+                break;
+            case WeaponType.SMG:
+            case WeaponType.SHOTGUN:
+                StartAnimHasGunLerpTo(1f);
+                break;
+        }
+    }
+    public void StartAnimHasGunLerpTo(float targetValue)
+    {
+        if (currentAnimHasGunLerp != null)
+        {
+            StopCoroutine(currentAnimHasGunLerp);
+        }
+
+        currentAnimHasGunLerp = StartCoroutine(LerpValueCoroutine(targetValue));
+    }
+    private IEnumerator LerpValueCoroutine(float targetValue)
+    {
+        float animationValue = animator.GetFloat(AnimParmName_HasGun);
+        float startValue = animationValue;
+        float timeElapsed = 0f;
+
+        while (timeElapsed < lerpHasGunDuration)
+        {
+            animationValue = Mathf.Lerp(startValue, targetValue, timeElapsed / lerpHasGunDuration);
+
+            animator.SetFloat(AnimParmName_HasGun, animationValue);
+            timeElapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        currentAnimHasGunLerp = null;
+    }
+    private IEnumerator ThrowGrenade()
+    {
+        isThrowingGrenade = true;
+        animator.SetTrigger("Throw");
+        yield return new WaitForSeconds(0.6f);
+        (currentWeapon as WeaponGrenade).ThrowGrenade();
+        yield return new WaitForSeconds(0.5f);
+        isThrowingGrenade = false;
     }
 }

@@ -7,7 +7,7 @@ namespace Weapon
     public class WeaponBase : MonoBehaviour
     {
         [SerializeField] private float bulletSpeed = 10f;
-        [SerializeField] private float shootSpeed = 0.5f;
+        [SerializeField] protected float shootSpeed = 0.5f;
         [SerializeField] private Transform[] gunBarrelPos;
         [SerializeField] private float bulletHorizontalDeviation;
         [SerializeField] private ParticleSystem[] particles;
@@ -38,35 +38,35 @@ namespace Weapon
         }
         public virtual BulletBase[] Fire(Transform playerTrans)
         {
-            if (shootTimer <= 0f)
+            if (shootTimer > 0f)
+                return null;
+
+            var bulletList = new BulletBase[gunBarrelPos.Length];
+            shootTimer = shootSpeed;
+            isFiring = true;
+            for (int i = 0; i < gunBarrelPos.Length; i++)
             {
-                var bulletList = new BulletBase[gunBarrelPos.Length];
-                shootTimer = shootSpeed;
-                isFiring = true;
-                for (int i = 0; i < gunBarrelPos.Length; i++)
-                {
-                    var randomYaw = Random.Range(-bulletHorizontalDeviation, bulletHorizontalDeviation);
-                    //var deviatedDirection = gunBarrelPos[i].right;//direction + new Vector3(0f, randomYaw, 0f);
-                    //var deviatedDirection = direction + new Vector3(0f, randomYaw, 0f);
-                    //var bulletPos = gunBarrelPos[i].position;
-                    var bullet = BulletPool.Instance.GetBullet(weaponType);
-                    if (bullet == null)
-                        return null;
-                    bullet.transform.position = gunBarrelPos[i].position;//playerTrans.position;
-                    bullet.transform.rotation = playerTrans.rotation;
-                    bullet.speed = bulletSpeed;
-                    bullet.gameObject.SetActive(true);
-                    bulletList[i] = bullet;
-                }
-
-                PlayParticles();
-                PlayVfx();
-
-                return bulletList;
+                var randomYaw = Random.Range(-bulletHorizontalDeviation, bulletHorizontalDeviation);
+                //var deviatedDirection = gunBarrelPos[i].right;//direction + new Vector3(0f, randomYaw, 0f);
+                //var deviatedDirection = direction + new Vector3(0f, randomYaw, 0f);
+                //var bulletPos = gunBarrelPos[i].position;
+                var bullet = BulletPool.Instance.GetBullet(weaponType);
+                if (bullet == null)
+                    return null;
+                bullet.transform.position = gunBarrelPos[i].position;//playerTrans.position;
+                bullet.transform.rotation = playerTrans.rotation;
+                bullet.speed = bulletSpeed;
+                bullet.gameObject.SetActive(true);
+                bulletList[i] = bullet;
             }
-            return null;
+
+            PlayParticles();
+            PlayVfx();
+
+            return bulletList;
+
         }
-        public virtual void StopFire(){}
+        public virtual BulletBase StopFire() { return null; }
 
         private void PlayParticles()
         {

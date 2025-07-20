@@ -59,6 +59,7 @@ MonoBehaviour:
   fixedBulletY: {fileID: 3660788045981211792}
   takeDamageParticle: {fileID: 1838334482011484679}
   cheat: 0
+  shootAngleTolerance: 10
   gameReady: 0
   levelManager: {fileID: 0}
 --- !u!114 &6608543438733834529
@@ -189,13 +190,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6481898211107650331}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.11508606, y: 0.90266937, z: -0.20631859, w: 0.35968858}
-  m_LocalPosition: {x: 0.025, y: -0.098, z: -0.071}
+  m_LocalRotation: {x: 0.1773507, y: 0.9545955, z: -0.1836949, w: 0.15346095}
+  m_LocalPosition: {x: 0, y: -0.091, z: -0.082}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4744380146710515335}
-  m_LocalEulerAnglesHint: {x: 27.082, y: 137.469, z: 3.822}
+  m_LocalEulerAnglesHint: {x: 23.9, y: 165.57, z: 17.98}
 --- !u!1001 &3673467165956282395
 PrefabInstance:
   m_ObjectHideFlags: 0

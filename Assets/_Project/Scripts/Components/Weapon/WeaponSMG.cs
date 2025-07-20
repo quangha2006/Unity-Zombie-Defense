@@ -17,13 +17,14 @@ namespace Weapon
                 SoundManager.Instance.PlayLoopingSFX(shootVfx, 0.3f);
             }
         }
-        public override void StopFire()
+        public override BulletBase StopFire()
         {
             if (isPlayLoopingSFX)
             {
                 isPlayLoopingSFX = false;
                 SoundManager.Instance.StopLoopingSFX();
             }
+            return null;
         }
         private void OnDisable()
         {

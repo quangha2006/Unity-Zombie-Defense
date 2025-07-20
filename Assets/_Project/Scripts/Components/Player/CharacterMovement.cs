@@ -26,23 +26,23 @@ public class CharacterMovement : MonoBehaviour
 
     void Update()
     {
-        Vector3 localMoveDirection = Vector3.zero;
-        if (playerController.gameReady && !playerController.isDeath)
+        var localMoveDirection = Vector3.zero;
+        if (playerController.canMove)
         {
-            Vector2 moveInput = InputManager.Instance.GetMoveInput();
-            Vector2 shootInput = InputManager.Instance.GetShootDirection();
+            var moveInput = InputManager.Instance.GetMoveInput();
+            var shootInput = InputManager.Instance.GetShootDirection();
 
-            Vector3 moveInputDirection = new Vector3(moveInput.x, 0, moveInput.y);
-            Vector3 shootInputDirection = new Vector3(shootInput.x, 0, shootInput.y);
+            var moveInputDirection = new Vector3(moveInput.x, 0, moveInput.y);
+            var shootInputDirection = new Vector3(shootInput.x, 0, shootInput.y);
 
             var hasShootDirection = shootInput.sqrMagnitude > 0.01f;
             var hasMoveInput = moveInputDirection.sqrMagnitude > 0.01f;
 
-            Vector3 cameraForward = cameraTransform.forward;
+            var cameraForward = cameraTransform.forward;
             cameraForward.y = 0;
             cameraForward.Normalize();
 
-            Vector3 cameraRight = cameraTransform.right;
+            var cameraRight = cameraTransform.right;
             cameraRight.y = 0;
             cameraRight.Normalize();
 
@@ -50,15 +50,15 @@ public class CharacterMovement : MonoBehaviour
 
             if (hasMoveInput)
             {
-                Vector3 moveDirection = (cameraForward * moveInputDirection.z) + (cameraRight * moveInputDirection.x);
+                var moveDirection = (cameraForward * moveInputDirection.z) + (cameraRight * moveInputDirection.x);
 
                 moveDirection.Normalize();
 
                 controller.SimpleMove(moveDirection * moveSpeed);
 
-                if (!hasShootDirection)
+                if (!hasShootDirection && !playerController.forceKeepRotation)
                 {
-                    Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
+                    var targetRotation = Quaternion.LookRotation(moveDirection);
                     transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
                 }
                 localMoveDirection = transform.InverseTransformDirection(moveDirection);
@@ -68,11 +68,11 @@ public class CharacterMovement : MonoBehaviour
             {
                 controller.SimpleMove(Vector3.zero);
             }
-            if (hasShootDirection)
+            if (hasShootDirection && !playerController.forceKeepRotation)
             {
-                Vector3 lookDirection = (cameraForward * shootInputDirection.z) + (cameraRight * shootInputDirection.x);
+                var lookDirection = (cameraForward * shootInputDirection.z) + (cameraRight * shootInputDirection.x);
                 lookDirection.Normalize();
-                Quaternion targetRotation = Quaternion.LookRotation(lookDirection);
+                var targetRotation = Quaternion.LookRotation(lookDirection);
                 transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
             }
         }

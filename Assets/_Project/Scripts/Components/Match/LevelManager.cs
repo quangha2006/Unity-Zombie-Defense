@@ -1,12 +1,16 @@
 using System;
 using System.Collections.Generic;
+using TMPro;
 using Unity.Cinemachine;
 using UnityEngine;
+using UnityEngine.UI;
 using Weapon;
 
 public class LevelManager : MonoBehaviour
 {
     [SerializeField] private int matchTime = 180;
+    [SerializeField] private float endMatchTime = 2f;
+    [SerializeField] private float matchPrepareTime = 4f;
     [SerializeField] private ZombieController[] zombiePrefabs;
     [SerializeField] private Transform[] zombieSpawnPoints;
     [SerializeField] private float zombieSpawnRate;
@@ -20,16 +24,21 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private string zombieChaseSfx;
     [SerializeField] private float timerChaseSfxMin;
     [SerializeField] private float timerChaseSfxMax;
-
+    [SerializeField] private Button exitButton;
+    [SerializeField] private int matchlevel;
+    [SerializeField] private GameObject countDownObject;
+    [SerializeField] private TMP_Text countDownText;
+    [SerializeField] private float[] zombieSpeedIncrement;
     private List<ZombieController> zombiePolling = new List<ZombieController>();
     
     private MatchState matchState = MatchState.None;
     private MatchState lastMatchState = MatchState.None;
     private int navMeshAgentPriority = 50;
     private float spawnTimer = 0f;
-    private float matchPrepareTime = 3f;
+    private float matchPrepareTimer;
     private float loadingTimer = 0.7f;
     private float zombieChaseSfxTimer;
+    private float endMatchTimer;
     private PlayerController mainPlayer;
     public int totalZombie          { get; private set; }
     public int totalZombieSpawned   { get; private set; }
@@ -46,10 +55,15 @@ public class LevelManager : MonoBehaviour
         totalZombie = zombieSpawned.Count + (int)(matchTime / zombieSpawnRate);
         totalZombieSpawned = zombieSpawned.Count;
         totalZombieDeath = 0;
+        endMatchTimer = endMatchTime;
+        matchPrepareTimer = matchPrepareTime;
+        countDownObject.SetActive(false);
+        gameHud.gameObject.SetActive(false);
     }
     private void Start()
     {
         UIManager.Instance.UpdateLoadingBar(0.11f);
+        exitButton.onClick.AddListener(OnExitButtonPressed);
         matchState++;
         if (!string.IsNullOrEmpty(backgroundMusic))
         {
@@ -78,15 +92,20 @@ public class LevelManager : MonoBehaviour
                 loadingTimer -= Time.deltaTime;
                 if (loadingTimer <= 0f)
                 {
-                    //UIManager.Instance.SetActiveLoadingScreen(false);
+                    UIManager.Instance.SetActiveLoadingScreen(false);
                     UIManager.Instance.SetActiveOnScreenJoyStick(true);
                     matchState++;
                 }
                 break;
             case MatchState.PlayCutScene:
-                matchPrepareTime -= Time.deltaTime;
-                if (matchPrepareTime <= 0f)
+                matchPrepareTimer -= Time.deltaTime;
+                if (matchPrepareTimer < (matchPrepareTime - 0.4f))
                 {
+                    CountDownUpdate(matchPrepareTimer);
+                }
+                if (matchPrepareTimer <= 0f)
+                {
+                    gameHud.gameObject.SetActive(true);
                     matchState++;
                     ActiveZombieAndPlayer();
                 }
@@ -109,15 +128,31 @@ public class LevelManager : MonoBehaviour
                 break;
             case MatchState.Lose:
                 //TODO: Show lose popup
-                matchState = MatchState.End;
+                matchState = MatchState.PrepareToEndMatch;
                 break;
             case MatchState.Win:
                 UIManager.Instance.SetActiveOnScreenJoyStick(false);
                 //TODO: Show win popup
-                matchState = MatchState.End;
+                matchState = MatchState.PrepareToEndMatch;
+                break;
+            case MatchState.PrepareToEndMatch:
+                SoundManager.Instance.StopBackgroundMusic();
+                endMatchTimer -= Time.deltaTime;
+                if (endMatchTimer <= 0f)
+                {
+                    gameHud.gameObject.SetActive(false);
+                    matchState = MatchState.End;
+                    if (mainPlayer.isDeath)
+                    {
+                        ShowLosePopup();
+                    }
+                    else
+                    {
+                        ShowWinPopup();
+                    }
+                }
                 break;
             case MatchState.End:
-                SoundManager.Instance.StopBackgroundMusic();
                 break;
         }
         if (matchState != lastMatchState)
@@ -215,6 +250,50 @@ public class LevelManager : MonoBehaviour
             matchState = MatchState.Win;
         }
     }
+    private void OnExitButtonPressed()
+    {
+        Time.timeScale = 0f;
+        UIManager.Instance.ShowCommonPopup("EXIT", "Are you sure you want to exit?", "Yes", "No", 
+            () => { 
+                Time.timeScale = 1f; 
+                GameManager.Instance.LoadLobbyScene(); 
+            }, 
+            () => {
+                Time.timeScale = 1f;
+            }
+            );
+    }
+    private void ShowWinPopup()
+    {
+        UIManager.Instance.ShowCommonPopup("YOU SURVIVED!", "Are you sure you want to exit?", "Return to Lobby", "Next Level",
+            () => {
+                GameManager.Instance.LoadLobbyScene();
+            },
+            () => {
+                if (!GameManager.Instance.LoadMatchLevel(matchlevel + 1,  out string errorMessage))
+                {
+                    Debug.LogError(errorMessage);
+                }
+            }
+            );
+    }
+    private void ShowLosePopup()
+    {
+        UIManager.Instance.ShowCommonPopup("YOU DIED!", "The zombies have eaten your brain...", "Return to Lobby", "Retry Match",
+            () => {
+                GameManager.Instance.LoadLobbyScene();
+            },
+            () => {
+                GameManager.Instance.LoadMatchLevel(matchlevel, out string errorMessage);
+            }
+            );
+    }
+    private void CountDownUpdate(float time)
+    {
+        countDownObject.SetActive(time > 0f);
+        countDownText.text = ((int)time).ToString();
+    }
+
     public enum MatchState
     {
         None = 0,
@@ -226,6 +305,7 @@ public class LevelManager : MonoBehaviour
         PlayerDeath = 6,
         Win = 7,
         Lose = 8,
+        PrepareToEndMatch = 9,
         End
     }
 }

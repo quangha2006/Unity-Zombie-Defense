@@ -456,8 +456,9 @@ GameObject:
   - component: {fileID: 188964022}
   - component: {fileID: 188964024}
   - component: {fileID: 188964023}
+  - component: {fileID: 188964025}
   m_Layer: 0
-  m_Name: Popups
+  m_Name: CommonPopup
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -521,6 +522,24 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 188964021}
   m_CullTransparentMesh: 1
+--- !u!114 &188964025
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 188964021}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80c0449aea213ef47a1b120b8d9d9809, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  titlePopup: {fileID: 120063004}
+  contentPopup: {fileID: 1994659009}
+  leftButtonText: {fileID: 687363421}
+  rightButtonText: {fileID: 1850427837}
+  leftButton: {fileID: 1874304142}
+  rightButton: {fileID: 2129651673}
 --- !u!1 &213101733
 GameObject:
   m_ObjectHideFlags: 0
@@ -1530,7 +1549,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Yes
+  m_text: Return To Lobby
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 9d24e6b3ecd1d2b479a31d3d0e7b1f9e, type: 2}
   m_sharedMaterial: {fileID: 21148088844906328, guid: 9d24e6b3ecd1d2b479a31d3d0e7b1f9e, type: 2}
@@ -1557,8 +1576,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 30
-  m_fontSizeBase: 30
+  m_fontSize: 26
+  m_fontSizeBase: 26
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -1843,9 +1862,8 @@ GameObject:
   - component: {fileID: 1535448663}
   - component: {fileID: 1535448666}
   - component: {fileID: 1535448665}
-  - component: {fileID: 1535448664}
   m_Layer: 0
-  m_Name: YesNoPopup
+  m_Name: Content
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1871,20 +1889,8 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 100}
-  m_SizeDelta: {x: 700, y: 387.5}
+  m_SizeDelta: {x: 750, y: 387.5}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1535448664
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1535448662}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 80c0449aea213ef47a1b120b8d9d9809, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &1535448665
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1956,6 +1962,7 @@ MonoBehaviour:
   loadingScreen: {fileID: 284451480}
   loadingBar: {fileID: 83645379}
   joySticks: {fileID: 577862328}
+  commonPopup: {fileID: 188964025}
 --- !u!4 &1549146484
 Transform:
   m_ObjectHideFlags: 0
@@ -2176,6 +2183,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   firstLoadingTime: 0.5
+  levelName:
+  - Level-01
 --- !u!4 &1717605856
 Transform:
   m_ObjectHideFlags: 0
@@ -2424,7 +2433,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: No
+  m_text: Retry Match
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 9d24e6b3ecd1d2b479a31d3d0e7b1f9e, type: 2}
   m_sharedMaterial: {fileID: 21148088844906328, guid: 9d24e6b3ecd1d2b479a31d3d0e7b1f9e, type: 2}
@@ -2451,8 +2460,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 30
-  m_fontSizeBase: 30
+  m_fontSize: 26
+  m_fontSizeBase: 26
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -2540,7 +2549,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 194, y: 60}
+  m_SizeDelta: {x: 218, y: 60}
   m_Pivot: {x: 1, y: 0}
 --- !u!114 &1874304140
 MonoBehaviour:
@@ -3012,7 +3021,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 194, y: 60}
+  m_SizeDelta: {x: 218, y: 60}
   m_Pivot: {x: 0, y: 0}
 --- !u!114 &2129651671
 MonoBehaviour:
@@ -3092,7 +3101,7 @@ MonoBehaviour:
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
   m_Interactable: 1
-  m_TargetGraphic: {fileID: 0}
+  m_TargetGraphic: {fileID: 2129651671}
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []

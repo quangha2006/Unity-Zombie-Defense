@@ -273,7 +273,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   bulletSpeed: 10
-  shootSpeed: 2
+  shootSpeed: 3
   gunBarrelPos: []
   bulletHorizontalDeviation: 0
   particles: []

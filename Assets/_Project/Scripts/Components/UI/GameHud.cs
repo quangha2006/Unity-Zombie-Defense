@@ -10,7 +10,7 @@ public class GameHud : MonoBehaviour
 
     private Queue<ZombieHealthBar> zombieHealthBarsPool = new Queue<ZombieHealthBar>();
 
-    private void Start()
+    private void Awake()
     {
         levelManager.OnZombieSpawned += RegisterZombie;
         levelManager.OnPlayerSpawned += RegisterPlayer;

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class SoundManager : MonoBehaviourSingleton<SoundManager>
 {
@@ -19,6 +20,7 @@ public class SoundManager : MonoBehaviourSingleton<SoundManager>
     {
         base.Awake();
         DontDestroyOnLoad(gameObject);
+        SceneManager.sceneUnloaded += OnSceneUnloaded;
     }
     private void Start()
     {
@@ -50,7 +52,10 @@ public class SoundManager : MonoBehaviourSingleton<SoundManager>
 
     public void StopBackgroundMusic()
     {
-        bgmSource.Stop();
+        if (bgmSource.isPlaying)
+        {
+            bgmSource.Stop();
+        }
     }
 
     public void PlaySFX(string name, float volumeScale = 1f)
@@ -90,6 +95,15 @@ public class SoundManager : MonoBehaviourSingleton<SoundManager>
         if (loopingSFXSource.isPlaying)
         {
             loopingSFXSource.Stop();
+        }
+    }
+    private void OnSceneUnloaded(Scene scene)
+    {
+        StopBackgroundMusic();
+        StopLoopingSFX();
+        if (sfxSource.isPlaying)
+        {
+            sfxSource.Stop();
         }
     }
 }
