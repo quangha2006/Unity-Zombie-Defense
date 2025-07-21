@@ -23,6 +23,8 @@ public class ZombieController : MonoBehaviour, IDamageable
     [SerializeField] private string deathVfx;
     [SerializeField] private bool cheat = false;
     [SerializeField] private string hitSfx;
+    [SerializeField] private Collider mainCollider;
+    [SerializeField] private GameObject childCollider;
     [HideInInspector] public PlayerController playerTarget;
     public NavMeshAgent NavMeshAgent => agent;
     private float updatePlayerPosTimer;
@@ -34,7 +36,6 @@ public class ZombieController : MonoBehaviour, IDamageable
     private AttackStateBehaviour[] attackStateBehaviour;
     private int currentHealth;
     private bool isDead = false;
-    private Collider collider;
     public event Action<int, int> onHealthChanged;
     public event Action onDie;
     public int health => currentHealth;
@@ -42,14 +43,15 @@ public class ZombieController : MonoBehaviour, IDamageable
     private bool isGoAround = false;
     private float goAroundWaiting;
     private const float maxGoAroundWaiting = 6f;
-
+    public float speedIncrement = 0f;
+    private float currentLayerUpperValue = 0f;
     void Awake()
     {
         currentHealth = maxHealth;
     }
     void Start()
     {
-        agent.speed = moveSpeed;
+        agent.speed = moveSpeed + speedIncrement;
         agent.acceleration = accelerationSpeed;
         agent.angularSpeed = angularSpeed;
         agent.stoppingDistance = stoppingDistance;
@@ -63,12 +65,18 @@ public class ZombieController : MonoBehaviour, IDamageable
         }
         hitbox.onTriggerEnter += OnArmHitboxTriggerEnter;
 
-        collider = GetComponent<Collider>();
+        mainCollider = GetComponent<Collider>();
         SwitchToAgent();
     }
 
     void Update()
     {
+        if (currentLayerUpperValue > 0f)
+        {
+            currentLayerUpperValue -= Time.deltaTime;
+            anim.SetLayerWeight(1, Math.Clamp(currentLayerUpperValue, 0f, 1f));
+        }
+
         if (playerTarget == null || isDead || !gameReady)
         {
             return;
@@ -123,7 +131,7 @@ public class ZombieController : MonoBehaviour, IDamageable
         }
         else if (distance <= stoppingDistance)
         {
-            SwitchToObstacle();
+            //SwitchToObstacle();
             if (!isAttacking && RotateTowardsTarget())
             {
                 anim.SetBool("Attacking", true);
@@ -244,11 +252,18 @@ public class ZombieController : MonoBehaviour, IDamageable
             currentHealth -= amount;
         onHealthChanged?.Invoke(currentHealth, maxHealth);
         ParticlePool.Instance.PlayFX(ParticleType.HitZombie, bodyPos.position, Quaternion.identity);
+        if (!isAttacking)
+        {
+            anim.SetTrigger("ReactionHit");
+            currentLayerUpperValue = 1f;
+            anim.SetLayerWeight(1, currentLayerUpperValue);
+        }
         if (currentHealth <= 0)
         {
             Die();
         }
     }
+
     private void Die()
     {
         if (isDead)
@@ -271,8 +286,11 @@ public class ZombieController : MonoBehaviour, IDamageable
             anim.SetBool("Death", true);
         }
 
-        if (collider != null)
-            collider.enabled = false;
+        if (mainCollider != null)
+        {
+            mainCollider.enabled = false;
+            childCollider.SetActive(false);
+        }
         onDie?.Invoke();
         SoundManager.Instance.PlaySFX(deathVfx);
         //Play particle and destroy or return to pool
@@ -280,6 +298,7 @@ public class ZombieController : MonoBehaviour, IDamageable
     }
     private void SwitchToAgent()
     {
+        return;
         if (!agent.enabled)
         {
             agentObstacle.enabled = false;

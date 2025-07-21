@@ -12,9 +12,11 @@ public class SoundManager : MonoBehaviourSingleton<SoundManager>
     [Header("Audio Clips")]
     [SerializeField] private List<AudioClip> bgmClips;
     [SerializeField] private List<AudioClip> sfxClips;
-
+    [SerializeField] private float limmitPlaySfxTime = 0.1f;
     private Dictionary<string, AudioClip> bgmMap;
     private Dictionary<string, AudioClip> sfxMap;
+
+    private Dictionary<string, float> lastPlayTimes = new Dictionary<string, float>();
 
     protected override void Awake()
     {
@@ -35,6 +37,10 @@ public class SoundManager : MonoBehaviourSingleton<SoundManager>
         {
             sfxMap[clip.name] = clip;
         }
+    }
+    public void SetSpeedBackgroundMusic(float pitch)
+    {
+        bgmSource.pitch = pitch;
     }
     public void PlayBackgroundMusic(string name)
     {
@@ -62,6 +68,13 @@ public class SoundManager : MonoBehaviourSingleton<SoundManager>
     {
         if (sfxMap.TryGetValue(name, out var clip))
         {
+            float currentTime = Time.time;
+            if (lastPlayTimes.TryGetValue(name, out float lastTime))
+            {
+                if (currentTime - lastTime < limmitPlaySfxTime)
+                    return;
+            }
+            lastPlayTimes[name] = currentTime;
             sfxSource.PlayOneShot(clip, volumeScale);
         }
         else
@@ -69,13 +82,7 @@ public class SoundManager : MonoBehaviourSingleton<SoundManager>
             Debug.LogWarning($"SFX '{name}' not found.");
         }
     }
-    public void PlaySFXAt(string name, Vector3 position)
-    {
-        if (sfxMap.TryGetValue(name, out var clip))
-        {
-            AudioSource.PlayClipAtPoint(clip, position);
-        }
-    }
+
     public void PlayLoopingSFX(string name, float volumeScale = 1f)
     {
         if (sfxMap.TryGetValue(name, out var clip))

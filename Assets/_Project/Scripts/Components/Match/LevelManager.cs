@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using Unity.Cinemachine;
 using UnityEngine;
@@ -40,6 +41,11 @@ public class LevelManager : MonoBehaviour
     private float zombieChaseSfxTimer;
     private float endMatchTimer;
     private PlayerController mainPlayer;
+    private int currentZombieSpeedIndex = 0;
+    private float totalZombieSpeedIncrement = 0;
+    private float speedIncrementTime = 0f;
+    private float speedIncrementTimer = 0f;
+    private bool isIncreaseZombieSpeed = false;
     public int totalZombie          { get; private set; }
     public int totalZombieSpawned   { get; private set; }
     public int totalZombieDeath     { get; private set; }
@@ -68,8 +74,18 @@ public class LevelManager : MonoBehaviour
         if (!string.IsNullOrEmpty(backgroundMusic))
         {
             SoundManager.Instance.PlayBackgroundMusic(backgroundMusic);
+            SoundManager.Instance.SetSpeedBackgroundMusic(1f);
         }
         zombieChaseSfxTimer = UnityEngine.Random.Range(timerChaseSfxMin, timerChaseSfxMax);
+        if (zombieSpeedIncrement != null && zombieSpeedIncrement.Length > 0)
+        {
+            speedIncrementTime = matchTime / (float)(zombieSpeedIncrement.Length + 1);
+            speedIncrementTimer = speedIncrementTime;
+            isIncreaseZombieSpeed = true;
+            currentZombieSpeedIndex = 0;
+            totalZombieSpeedIncrement = 0f;
+
+        }
     }
     void Update()
     {
@@ -111,15 +127,27 @@ public class LevelManager : MonoBehaviour
                 }
                 break;
             case MatchState.Playing:
+                if (isIncreaseZombieSpeed)
+                {
+                    speedIncrementTimer -= Time.deltaTime;
+                    if (speedIncrementTimer <= 0 && currentZombieSpeedIndex < zombieSpeedIncrement.Length)
+                    {
+                        totalZombieSpeedIncrement += zombieSpeedIncrement[currentZombieSpeedIndex];
+                        currentZombieSpeedIndex++;
+                        speedIncrementTimer = speedIncrementTime;
+                        SoundManager.Instance.SetSpeedBackgroundMusic(1f + totalZombieSpeedIncrement);
+                        Debug.Log("totalZombieSpeedIncrement: " + totalZombieSpeedIncrement);
+                    }
+                }
                 if (totalZombieSpawned < totalZombie)
                 {
-                    SpawnNewZombie();
+                    SpawnNewZombie(totalZombieSpeedIncrement);
                 }
                 zombieChaseSfxTimer -= Time.deltaTime;
                 if (zombieChaseSfxTimer <= 0f)
                 {
                     zombieChaseSfxTimer = UnityEngine.Random.Range(timerChaseSfxMin, timerChaseSfxMax);
-                    SoundManager.Instance.PlaySFX(zombieChaseSfx);
+                    SoundManager.Instance.PlaySFX(zombieChaseSfx, 0.5f);
                 }
                 break;
             case MatchState.PlayerDeath:
@@ -161,7 +189,7 @@ public class LevelManager : MonoBehaviour
             OnMatchStateChanged?.Invoke(matchState);
         }
     }
-    private void SpawnNewZombie()
+    private void SpawnNewZombie(float speedIncrement)
     {
         spawnTimer -= Time.deltaTime;
 
@@ -194,6 +222,7 @@ public class LevelManager : MonoBehaviour
             newZombie.playerTarget = mainPlayer;
             newZombie.NavMeshAgent.avoidancePriority = navMeshAgentPriority++;
             newZombie.gameReady = true;
+            newZombie.speedIncrement = speedIncrement;
             newZombie.onDie += OnZombieDeath;
             zombieSpawned.Add(newZombie);
             totalZombieSpawned++;

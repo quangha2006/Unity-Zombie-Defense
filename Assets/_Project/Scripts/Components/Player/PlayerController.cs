@@ -60,7 +60,6 @@ public class PlayerController : MonoBehaviour, IDamageable
         {
             levelManager.OnMatchStateChanged += OnMatchStateChanged;
         }
-        animator.SetFloat(AnimParmName_HasGun, 0);
     }
 
     void Update()
@@ -81,6 +80,7 @@ public class PlayerController : MonoBehaviour, IDamageable
             {
                 wasPressedFireLastFrame = false;
                 currentWeapon.StopFire();
+                animator.SetBool("IsShooting", false);
             }
             return;
         }
@@ -146,6 +146,7 @@ public class PlayerController : MonoBehaviour, IDamageable
         onDeath?.Invoke();
         animator.SetLayerWeight(1, 0);
         animator.SetTrigger("IsDeath");
+        animator.SetBool("IsShooting", false);
         // TODO: invoke die callback to level manager.
     }
 
@@ -204,6 +205,7 @@ public class PlayerController : MonoBehaviour, IDamageable
     }
     private void OnWeaponChanged(WeaponBase weapon)
     {
+        Debug.Log("OnWeaponChanged: " + weapon.weaponType);
         switch(weapon.weaponType)
         {
             case WeaponType.GRENADE:
@@ -226,6 +228,7 @@ public class PlayerController : MonoBehaviour, IDamageable
     }
     private IEnumerator LerpValueCoroutine(float targetValue)
     {
+        Debug.Log("LerpValueCoroutine Begin: " + targetValue);
         float animationValue = animator.GetFloat(AnimParmName_HasGun);
         float startValue = animationValue;
         float timeElapsed = 0f;
@@ -238,7 +241,8 @@ public class PlayerController : MonoBehaviour, IDamageable
             timeElapsed += Time.deltaTime;
             yield return null;
         }
-
+        animator.SetFloat(AnimParmName_HasGun, targetValue);
+        Debug.Log("LerpValueCoroutine END: " + animationValue);
         currentAnimHasGunLerp = null;
     }
     private IEnumerator ThrowGrenade()

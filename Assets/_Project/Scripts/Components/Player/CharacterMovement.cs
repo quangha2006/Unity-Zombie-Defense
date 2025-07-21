@@ -1,6 +1,5 @@
-using UnityEditor.Animations;
 using UnityEngine;
-using UnityEngine.EventSystems;
+
 
 [RequireComponent(typeof(CharacterController))]
 public class CharacterMovement : MonoBehaviour

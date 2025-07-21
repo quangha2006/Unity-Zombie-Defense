@@ -14,6 +14,8 @@ public class GameManager : MonoBehaviourSingleton<GameManager>
     {
         base.Awake();
         DontDestroyOnLoad(Instance);
+        Application.targetFrameRate = 60;
+        QualitySettings.vSyncCount = 0;
     }
     void Start()
     {
