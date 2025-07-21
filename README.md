@@ -14,6 +14,10 @@ Assets/_Project/Scenes/BootLoaderScene.unity
 - Use **W A S D** keys to move your character.
 - Use the **mouse** to aim and shoot.
 
+## Demo Video
+
+[![Watch the video](https://img.youtube.com/vi/AiYN_yJL_hc/0.jpg)](https://www.youtube.com/watch?v=AiYN_yJL_hc)
+
 ## Support
 
 If you have any questions or issues, feel free to contact me at **hdquang206@gmail.com**.
