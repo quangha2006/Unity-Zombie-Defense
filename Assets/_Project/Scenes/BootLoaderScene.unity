@@ -2186,6 +2186,7 @@ MonoBehaviour:
   firstLoadingTime: 0.5
   levelName:
   - Level-01
+  - Level-02
 --- !u!4 &1717605856
 Transform:
   m_ObjectHideFlags: 0

@@ -48,7 +48,10 @@ namespace UI.Joystick
             canvas = GetComponentInParent<Canvas>();
             if (canvas == null)
                 Debug.LogError("The Joystick is not placed inside a canvas");
-
+        }
+        private void OnEnable()
+        {
+            input = Vector2.zero;
             Vector2 center = new Vector2(0.5f, 0.5f);
             background.pivot = center;
             handle.anchorMin = center;

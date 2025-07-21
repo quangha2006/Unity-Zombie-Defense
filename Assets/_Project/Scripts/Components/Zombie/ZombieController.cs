@@ -160,7 +160,7 @@ public class ZombieController : MonoBehaviour, IDamageable
             return true;
 
         Quaternion lookRotation = Quaternion.LookRotation(direction);
-        transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 5f);
+        transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 10f);
         
         float angle = Quaternion.Angle(transform.rotation, lookRotation);
         return angle <= rotationTolerance;
