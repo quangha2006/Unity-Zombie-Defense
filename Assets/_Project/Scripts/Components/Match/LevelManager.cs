@@ -294,11 +294,17 @@ public class LevelManager : MonoBehaviour
     }
     private void ShowWinPopup()
     {
-        UIManager.Instance.ShowCommonPopup("YOU SURVIVED!", "Are you sure you want to exit?", "Return to Lobby", "Next Level",
+        var nextButtonText = matchlevel >= 2 ? "Retry Match" : "Next Level";
+        UIManager.Instance.ShowCommonPopup("YOU SURVIVED!", "All zombies have been eliminated… but the nightmare isn’t over.", "Return to Lobby", nextButtonText,
             () => {
                 GameManager.Instance.LoadLobbyScene();
             },
             () => {
+                if (matchlevel >= 2)
+                {
+                    GameManager.Instance.LoadMatchLevel(matchlevel, out string error);
+                    return;
+                }
                 if (!GameManager.Instance.LoadMatchLevel(matchlevel + 1,  out string errorMessage))
                 {
                     Debug.LogError(errorMessage);

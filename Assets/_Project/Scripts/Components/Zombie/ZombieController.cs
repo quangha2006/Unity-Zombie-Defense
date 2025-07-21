@@ -25,6 +25,9 @@ public class ZombieController : MonoBehaviour, IDamageable
     [SerializeField] private string hitSfx;
     [SerializeField] private Collider mainCollider;
     [SerializeField] private GameObject childCollider;
+    [SerializeField] private float addRunAnimSpeedDefault = 1;
+    [SerializeField] private bool ignoreHitAnim = false;
+    [SerializeField] private Renderer zombieRenderer;
     [HideInInspector] public PlayerController playerTarget;
     public NavMeshAgent NavMeshAgent => agent;
     private float updatePlayerPosTimer;
@@ -64,7 +67,7 @@ public class ZombieController : MonoBehaviour, IDamageable
             behaviour.onStateEnter += OnAnimAttackEnter;
         }
         hitbox.onTriggerEnter += OnArmHitboxTriggerEnter;
-
+        anim.SetFloat("RunAnimSpeed", addRunAnimSpeedDefault);
         mainCollider = GetComponent<Collider>();
         SwitchToAgent();
     }
@@ -132,6 +135,7 @@ public class ZombieController : MonoBehaviour, IDamageable
         else if (distance <= stoppingDistance)
         {
             //SwitchToObstacle();
+            agent.velocity = Vector3.zero;
             if (!isAttacking && RotateTowardsTarget())
             {
                 anim.SetBool("Attacking", true);
@@ -252,7 +256,7 @@ public class ZombieController : MonoBehaviour, IDamageable
             currentHealth -= amount;
         onHealthChanged?.Invoke(currentHealth, maxHealth);
         ParticlePool.Instance.PlayFX(ParticleType.HitZombie, bodyPos.position, Quaternion.identity);
-        if (!isAttacking)
+        if (!isAttacking && !ignoreHitAnim)
         {
             anim.SetTrigger("ReactionHit");
             currentLayerUpperValue = 1f;
@@ -293,6 +297,10 @@ public class ZombieController : MonoBehaviour, IDamageable
         }
         onDie?.Invoke();
         SoundManager.Instance.PlaySFX(deathVfx);
+        //if (zombieRenderer != null)
+        //{
+        //    zombieRenderer.material.mainTexture.mipMapBias = 4.0f;
+        //}
         //Play particle and destroy or return to pool
         //Destroy(gameObject, 5f);
     }

@@ -32,13 +32,13 @@ namespace UI.Joystick
         [SerializeField] private bool snapY = false;
 
         [SerializeField] protected RectTransform background = null;
-        [SerializeField] private RectTransform handle = null;
+        [SerializeField] protected RectTransform handle = null;
         private RectTransform baseRect = null;
 
         private Canvas canvas;
         private Camera cam;
 
-        private Vector2 input = Vector2.zero;
+        protected Vector2 input = Vector2.zero;
 
         protected virtual void Start()
         {
@@ -48,16 +48,6 @@ namespace UI.Joystick
             canvas = GetComponentInParent<Canvas>();
             if (canvas == null)
                 Debug.LogError("The Joystick is not placed inside a canvas");
-        }
-        private void OnEnable()
-        {
-            input = Vector2.zero;
-            Vector2 center = new Vector2(0.5f, 0.5f);
-            background.pivot = center;
-            handle.anchorMin = center;
-            handle.anchorMax = center;
-            handle.pivot = center;
-            handle.anchoredPosition = Vector2.zero;
         }
 
         public virtual void OnPointerDown(PointerEventData eventData)

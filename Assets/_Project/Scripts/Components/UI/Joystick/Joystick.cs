@@ -35,6 +35,14 @@ namespace UI.Joystick
             fixedPosition = background.anchoredPosition;
             SetMode(joystickType);
         }
+        private void OnEnable()
+        {
+            if (joystickType != JoystickType.Fixed)
+                background.gameObject.SetActive(false);
+            IsPressed = false;
+            input = Vector2.zero;
+            handle.anchoredPosition = Vector2.zero;
+        }
 
         public override void OnPointerDown(PointerEventData eventData)
         {

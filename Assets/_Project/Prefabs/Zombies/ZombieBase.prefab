@@ -216,7 +216,11 @@ MonoBehaviour:
   hitSfx: zombie_hiss_010
   mainCollider: {fileID: 3083313667234856015}
   childCollider: {fileID: 3560739502587919893}
+  addRunAnimSpeedDefault: 1
+  ignoreHitAnim: 0
+  zombieRenderer: {fileID: 1611133602979741584}
   playerTarget: {fileID: 0}
+  speedIncrement: 0
 --- !u!195 &2840997652945502345
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -331,6 +335,11 @@ Transform:
 --- !u!95 &613663844159786038 stripped
 Animator:
   m_CorrespondingSourceObject: {fileID: 5866666021909216657, guid: 3ea946212e7416c4f8a3e7a404166265, type: 3}
+  m_PrefabInstance: {fileID: 6480321054322831783}
+  m_PrefabAsset: {fileID: 0}
+--- !u!137 &1611133602979741584 stripped
+SkinnedMeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 5743598964883115575, guid: 3ea946212e7416c4f8a3e7a404166265, type: 3}
   m_PrefabInstance: {fileID: 6480321054322831783}
   m_PrefabAsset: {fileID: 0}
 --- !u!4 &5111631004956857873 stripped
